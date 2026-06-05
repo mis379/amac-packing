@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>AMAC Packing System</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
 <style>
 :root {
   --teal: #1a8a7a;
@@ -293,10 +293,9 @@ function api(fn, params, cb, errCb) {
 }
 
 function apiPost(fn, body, cb, errCb) {
-  fetch(GAS_URL, {
-    method: 'POST',
-    body: JSON.stringify({fn: fn, data: body})
-  })
+  // Use GET with encoded data to avoid CORS issues
+  var url = GAS_URL + '?fn=' + fn + '&data=' + encodeURIComponent(JSON.stringify(body));
+  fetch(url)
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.error) { if (errCb) errCb({message: data.error}); return; }
@@ -394,15 +393,12 @@ function drawPack() {
       '</div>' +
       '<div id="panelList">' + renderPanelList() + '</div>' +
     '</div>' +
-    '<div class="card-title">SCAN PANEL BARCODE</div>' +
-    '<div class="scan-area">' +
-      '<div class="scan-frame" id="scanFrame">' +
-        '<video id="camVid" autoplay playsinline muted></video>' +
-        '<div class="scan-line" id="scanLine"></div>' +
-        '<div id="camPh" style="color:rgba(255,255,255,0.4);font-size:12px;text-align:center;padding:10px">Camera band hai<br><small>Start Camera tap karo</small></div>' +
-      '</div>' +
-      '<div class="cam-status" id="camStat">Camera ready...</div>' +
-      '<button class="btn btn-secondary btn-sm" onclick="toggleCam()" id="camBtn" style="width:auto;min-width:140px">📷 Start Camera</button>' +
+    '<div style="background:#1a1a2e;border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">' +
+      '<div style="color:white;font-size:14px;font-weight:600;margin-bottom:12px;">📷 SCAN PANEL BARCODE</div>' +
+      '<input type="text" id="barcodeInput" placeholder="Barcode scan here..." ' +
+        'style="width:100%;padding:14px;font-size:16px;border-radius:8px;border:2px solid #1a8a7a;background:white;text-align:center;" ' +
+        'oninput="handleBarcodeInput(this.value)" autofocus/>' +
+      '<div style="color:rgba(255,255,255,0.6);font-size:12px;margin-top:8px">Agar aapke paas barcode scanner gun hai toh usse scan karo<br>Ya neeche manually type karo</div>' +
     '</div>' +
     '<div class="manual-box">' +
       '<div class="manual-lbl">YA MANUALLY TYPE KARO</div>' +
@@ -429,107 +425,25 @@ function renderPanelList() {
 }
 
 // ── CAMERA ─────────────────────────────────────────────
-function toggleCam() {
-  if (S.scanning) stopCam();
-  else startCam();
+var barcodeTimer = null;
+function handleBarcodeInput(val) {
+  // Auto-submit after 500ms of no typing (scanner sends code instantly)
+  clearTimeout(barcodeTimer);
+  if (!val || val.length < 3) return;
+  barcodeTimer = setTimeout(function() {
+    var inp = document.getElementById('barcodeInput');
+    if (inp) inp.value = '';
+    doPanel(val);
+  }, 300);
 }
 
-function startCam() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    toast('Camera not supported', 'err');
-    return;
-  }
-  var constraints = { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } };
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then(function(stream) {
-      S.camStream = stream;
-      S.scanning = true;
-      var vid = document.getElementById('camVid');
-      var ph = document.getElementById('camPh');
-      var sl = document.getElementById('scanLine');
-      var btn = document.getElementById('camBtn');
-      var stat = document.getElementById('camStat');
-      if (vid) { vid.srcObject = stream; vid.style.display = 'block'; }
-      if (ph) ph.style.display = 'none';
-      if (sl) sl.style.display = 'block';
-      if (btn) btn.textContent = '⏹ Stop Camera';
-      if (stat) stat.textContent = 'Camera active — scanning...';
-      initZXing();
-    })
-    .catch(function(err) {
-      toast('Camera error: ' + err.message, 'err');
-    });
-}
+function toggleCam() {}
 
-function stopCam() {
-  try { if (typeof Quagga !== "undefined") Quagga.stop(); } catch(e) {}
-  if (S.camStream) { S.camStream.getTracks().forEach(function(t) { t.stop(); }); S.camStream = null; }
-  S.scanning = false;
-  var vid = document.getElementById('camVid');
-  var ph = document.getElementById('camPh');
-  var sl = document.getElementById('scanLine');
-  var btn = document.getElementById('camBtn');
-  var stat = document.getElementById('camStat');
-  if (vid) { vid.srcObject = null; vid.style.display = 'none'; }
-  if (ph) ph.style.display = 'block';
-  if (sl) sl.style.display = 'none';
-  if (btn) btn.textContent = '📷 Start Camera';
-  if (stat) stat.textContent = 'Camera stopped';
-}
+function startCam() {}
 
-function initZXing() {
-  if (typeof Quagga === 'undefined') { setTimeout(initZXing, 500); return; }
-  var vid = document.getElementById('camVid');
-  if (!vid) return;
+function stopCam() {}
 
-  Quagga.init({
-    inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
-      target: document.getElementById('scanFrame'),
-      constraints: {
-        facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    },
-    decoder: {
-      readers: ['code_128_reader','code_39_reader','ean_reader','ean_8_reader']
-    },
-    locate: true
-  }, function(err) {
-    if (err) {
-      var stat = document.getElementById('camStat');
-      if (stat) stat.textContent = 'Scanner error: ' + err;
-      return;
-    }
-    Quagga.start();
-    var stat = document.getElementById('camStat');
-    if (stat) stat.textContent = 'Camera active — scanning...';
-  });
-
-  Quagga.onDetected(function(result) {
-    var code = result.codeResult.code;
-    if (code && code !== S.lastCode) {
-      S.lastCode = code;
-      var stat = document.getElementById('camStat');
-      if (stat) stat.textContent = '✅ Scanned: ' + code;
-      doPanel(code);
-      setTimeout(function() { S.lastCode = null; }, 3000);
-    }
-  });
-}
-
-function scanLoop() {}
-
-// ── PANEL PROCESSING ───────────────────────────────────
-function doManual() {
-  var inp = document.getElementById('mInp');
-  var val = inp ? inp.value.trim() : '';
-  if (!val) { toast('Panel ID khali hai!', 'warn'); return; }
-  inp.value = '';
-  doPanel(val);
-}
+function initZXing() {}
 
 function doPanel(panelId) {
   if (!S.order) { toast('Pehle order select karo!', 'warn'); return; }
