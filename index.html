@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>AMAC Packing System</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.1/zxing.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 <style>
 :root {
   --teal: #1a8a7a;
@@ -462,6 +462,7 @@ function startCam() {
 }
 
 function stopCam() {
+  try { if (typeof Quagga !== "undefined") Quagga.stop(); } catch(e) {}
   if (S.camStream) { S.camStream.getTracks().forEach(function(t) { t.stop(); }); S.camStream = null; }
   S.scanning = false;
   var vid = document.getElementById('camVid');
@@ -477,45 +478,49 @@ function stopCam() {
 }
 
 function initZXing() {
-  if (typeof ZXing === 'undefined') { setTimeout(initZXing, 500); return; }
-  if (!S.zxingReader) {
-    var hints = new Map();
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-      ZXing.BarcodeFormat.CODE_128,
-      ZXing.BarcodeFormat.CODE_39,
-      ZXing.BarcodeFormat.EAN_13,
-      ZXing.BarcodeFormat.QR_CODE,
-      ZXing.BarcodeFormat.DATA_MATRIX
-    ]);
-    S.zxingReader = new ZXing.MultiFormatReader();
-    S.zxingReader.setHints(hints);
-  }
-  scanLoop();
-}
-
-function scanLoop() {
-  if (!S.scanning) return;
+  if (typeof Quagga === 'undefined') { setTimeout(initZXing, 500); return; }
   var vid = document.getElementById('camVid');
-  if (!vid || vid.readyState < 2) { setTimeout(scanLoop, 200); return; }
-  try {
-    var canvas = document.createElement('canvas');
-    canvas.width = vid.videoWidth;
-    canvas.height = vid.videoHeight;
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(vid, 0, 0);
-    var lum = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
-    var bin = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
-    var result = S.zxingReader.decode(bin);
-    if (result && result.text && result.text !== S.lastCode) {
-      S.lastCode = result.text;
+  if (!vid) return;
+
+  Quagga.init({
+    inputStream: {
+      name: 'Live',
+      type: 'LiveStream',
+      target: document.getElementById('scanFrame'),
+      constraints: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    },
+    decoder: {
+      readers: ['code_128_reader','code_39_reader','ean_reader','ean_8_reader']
+    },
+    locate: true
+  }, function(err) {
+    if (err) {
       var stat = document.getElementById('camStat');
-      if (stat) stat.textContent = '✅ Scanned: ' + result.text;
-      doPanel(result.text);
+      if (stat) stat.textContent = 'Scanner error: ' + err;
+      return;
+    }
+    Quagga.start();
+    var stat = document.getElementById('camStat');
+    if (stat) stat.textContent = 'Camera active — scanning...';
+  });
+
+  Quagga.onDetected(function(result) {
+    var code = result.codeResult.code;
+    if (code && code !== S.lastCode) {
+      S.lastCode = code;
+      var stat = document.getElementById('camStat');
+      if (stat) stat.textContent = '✅ Scanned: ' + code;
+      doPanel(code);
       setTimeout(function() { S.lastCode = null; }, 3000);
     }
-  } catch(e) {}
-  requestAnimationFrame(scanLoop);
+  });
 }
+
+function scanLoop() {}
 
 // ── PANEL PROCESSING ───────────────────────────────────
 function doManual() {
