@@ -206,19 +206,76 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fa;color:#1a1a2e}
 <script>
 var GAS = 'https://script.google.com/macros/s/AKfycbx45o0HYTLvgGyS9BNWhOZrx2qJKZQ_TnKzPXXR2g0RWC2P7w5s792EGApuscJpj5Ni/exec';
 
+// Detect if running inside GAS or GitHub Pages
+var IS_GAS = (typeof google !== 'undefined' && typeof google.script !== 'undefined');
+
+// Universal API call - works on both GAS and GitHub Pages
+function gasCall(fn, params, onSuccess, onError) {
+  if (IS_GAS) {
+    // Direct GAS call
+    var runner = gsr.withSuccessHandler(onSuccess).withFailureHandler(onError || function(e){ console.error(e); });
+    runner[fn].apply(runner, params || []);
+  } else {
+    // Fetch call from GitHub Pages
+    var url = GAS + '?fn=' + encodeURIComponent(fn);
+    if (params && params.length > 0) {
+      url += '&args=' + encodeURIComponent(JSON.stringify(params));
+    }
+    fetch(url)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.error) { if(onError) onError({message: data.error}); return; }
+        if (onSuccess) onSuccess(data.result !== undefined ? data.result : data);
+      })
+      .catch(function(e){ if(onError) onError(e); });
+  }
+}
+
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbx45o0HYTLvgGyS9BNWhOZrx2qJKZQ_TnKzPXXR2g0RWC2P7w5s792EGApuscJpj5Ni/exec';
+var IS_GAS = (typeof google !== 'undefined' && typeof google.script !== 'undefined');
 var S = { order:null, box:'BOX-01', packer:'', panels:[], cutlist:[], otype:'Wardrobe', stream:null, scanning:false, lastCode:null };
+
+// Proxy for gsr that works on GitHub Pages too
+var gsr = {
+  _sh: null, _fh: null,
+  withSuccessHandler: function(fn){ var n=Object.create(gsr); n._sh=fn; n._fh=gsr._fh; return n; },
+  withFailureHandler: function(fn){ var n=Object.create(gsr); n._fh=fn; n._sh=gsr._sh; return n; },
+  _call: function(fn, args) {
+    var sh=this._sh, fh=this._fh;
+    if(IS_GAS) {
+      var r=gsr;
+      if(sh) r=r.withSuccessHandler(sh);
+      if(fh) r=r.withFailureHandler(fh);
+      r[fn].apply(r, args||[]);
+    } else {
+      var url = GAS_URL + '?fn='+encodeURIComponent(fn)+'&args='+encodeURIComponent(JSON.stringify(args||[]));
+      fetch(url)
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.error){if(fh)fh({message:d.error});return;}
+          if(sh)sh(d.result!==undefined?d.result:d);
+        })
+        .catch(function(e){if(fh)fh(e);});
+    }
+  }
+};
+// Create proxy methods for all GAS functions
+['getSettings','getOrders','getCutlist','getBoxPanels','getPackingReport','addPanelToBox',
+ 'saveOrder','uploadCutlist','sealBox','saveSetting','setupSheets','getBoxes'].forEach(function(fn){
+  gsr[fn] = function(){gsr._call.call(this, fn, Array.prototype.slice.call(arguments));};
+});
 
 // ── BOOT
 window.onload = function() {
   drawPack();
-  google.script.run.withSuccessHandler(function(s){
+  gasCall('getSettings', [], function(s){
     S.packer = s.PackerName||'';
     var e = document.getElementById('hSub');
     if(e) e.textContent = (s.CompanyName||'AMAC')+' · '+(s.City||'Mohali');
     document.getElementById('cDot').style.background = '#4ade80';
-  }).withFailureHandler(function(){
+  }, function(){
     document.getElementById('cDot').style.background = '#f87171';
-  }).getSettings();
+  });
 };
 
 // ── NAV
@@ -405,7 +462,7 @@ function doPanel(id){
   if(!S.order){toast('Pehle order select karo!','warn');return;}
   var area=document.getElementById('resArea');
   if(area)area.innerHTML='<div class="ld"><div class="spin"></div><span>Looking up...</span></div>';
-  google.script.run
+  gsr
     .withSuccessHandler(function(res){showRes(id,res);})
     .withFailureHandler(function(e){
       if(area)area.innerHTML='<div class="res warn"><div style="color:#e74c3c;font-weight:600">Error: '+(e.message||'Server error')+'</div></div>';
@@ -429,7 +486,7 @@ function showRes(id,res){
     toast('✅ Added to '+S.box,'ok');
   }
   if(res.success){
-    google.script.run
+    gsr
       .withSuccessHandler(function(ps){
         S.panels=ps||[];
         var cn=document.getElementById('cNum');
@@ -470,7 +527,7 @@ function renderPList(){
 function swBox(b){
   S.box=b;S.panels=[];drawPack();
   if(S.order){
-    google.script.run.withSuccessHandler(function(ps){
+    gsr.withSuccessHandler(function(ps){
       S.panels=ps||[];
       var cn=document.getElementById('cNum');if(cn)cn.textContent=S.panels.length;
       var pl=document.getElementById('pList');if(pl)pl.innerHTML=renderPList();
@@ -496,7 +553,7 @@ function openSeal(){document.getElementById('sNotes').value='';openM('mSeal');}
 function doSeal(){
   var n=document.getElementById('sNotes').value;
   closeM('mSeal');
-  google.script.run.withSuccessHandler(function(){toast(S.box+' sealed!','ok');nxtBox();})
+  gsr.withSuccessHandler(function(){toast(S.box+' sealed!','ok');nxtBox();})
     .withFailureHandler(function(){toast('Seal failed','err');})
     .sealBox(S.order.OrderID,S.box,n);
 }
@@ -506,7 +563,7 @@ function openOrd(){openM('mOrd');srchOrd('');}
 function srchOrd(q){
   var c=document.getElementById('oList');
   c.innerHTML='<div class="ld"><div class="spin"></div></div>';
-  google.script.run.withSuccessHandler(function(orders){
+  gasCall('getOrders', [document.getElementById('oSrch')?document.getElementById('oSrch').value:''], function(orders){
     if(!orders||orders.length===0){c.innerHTML='<div class="empty" style="padding:20px"><div class="etxt">No orders</div></div>';return;}
     var h='';
     for(var i=0;i<orders.length;i++){
@@ -544,7 +601,7 @@ function saveOrd(){
   var nm=document.getElementById('nName').value.trim();
   if(!nm){toast('Customer name required!','err');return;}
   var o={CustomerName:nm,OrderNo:document.getElementById('nNo').value.trim(),Type:S.otype,Address:document.getElementById('nAddr').value.trim()};
-  google.script.run.withSuccessHandler(function(res){
+  gsr.withSuccessHandler(function(res){
     o.OrderID=res.OrderID;o.TotalPanels=0;o.PackedPanels=0;o.Status='Active';
     closeM('mNew');S.order=o;S.box='BOX-01';S.panels=[];drawPack();
     toast('Order created!','ok');
@@ -571,7 +628,7 @@ function drawCutlist(){
 function loadCL(){
   var c=document.getElementById('clBody');
   if(!c||!S.order)return;
-  google.script.run.withSuccessHandler(function(list){
+  gsr.withSuccessHandler(function(list){
     S.cutlist=list||[];
     if(S.cutlist.length===0){c.innerHTML='<div class="empty"><div class="eico">📄</div><div class="etxt">No Cutlist</div><div class="esub">Upload CSV</div></div>';return;}
     var pk=0;for(var i=0;i<S.cutlist.length;i++)if(S.cutlist[i].Status==='Packed')pk++;
@@ -587,7 +644,7 @@ function upCSV(inp){
   toast('Uploading...','info');
   var rd=new FileReader();
   rd.onload=function(e){
-    google.script.run.withSuccessHandler(function(res){
+    gsr.withSuccessHandler(function(res){
       toast('✅ '+res.count+' panels loaded!','ok');
       loadCL();
     }).withFailureHandler(function(err){toast('Upload error','err');})
@@ -629,7 +686,7 @@ function drawReport(){
   var pg=document.getElementById('pg-report');
   if(!S.order){pg.innerHTML='<div class="empty" style="margin-top:40px"><div class="eico">📊</div><div class="etxt">No Order Selected</div><button class="btn btn-p" style="margin-top:16px;max-width:220px" onclick="openOrd()">Select Order</button></div>';return;}
   pg.innerHTML='<div class="ld" style="margin-top:40px"><div class="spin"></div></div>';
-  google.script.run.withSuccessHandler(function(r){
+  gsr.withSuccessHandler(function(r){
     var pct=r.total>0?Math.round(r.packed/r.total*100):0;
     var h='<div style="background:#1a8a7a;color:white;border-radius:12px;padding:16px;margin-bottom:12px">'+
       '<div style="font-size:18px;font-weight:800">'+x(r.order?r.order.CustomerName:'—')+'</div>'+
@@ -657,7 +714,7 @@ function drawReport(){
 function drawSetup(){
   var pg=document.getElementById('pg-setup');
   pg.innerHTML='<div class="ld"><div class="spin"></div></div>';
-  google.script.run.withSuccessHandler(function(s){
+  gsr.withSuccessHandler(function(s){
     pg.innerHTML='<div style="font-size:18px;font-weight:800;margin-bottom:16px">Settings</div>'+
       '<div class="card">'+
         mkSet('Company','CompanyName','sv-co',s.CompanyName||'')+
@@ -687,7 +744,7 @@ function edSet(key,lbl,id){
   var curr=document.getElementById(id)?document.getElementById(id).textContent:'';
   var v=prompt(lbl+':',curr==='Not set'?'':curr);
   if(v===null)return;
-  google.script.run.withSuccessHandler(function(){
+  gsr.withSuccessHandler(function(){
     var el=document.getElementById(id);if(el)el.textContent=v||'Not set';
     if(key==='PackerName')S.packer=v;
     toast(lbl+' updated!','ok');
@@ -696,12 +753,12 @@ function edSet(key,lbl,id){
 
 function doSetup(){
   toast('Setting up...','info');
-  google.script.run.withSuccessHandler(function(){toast('✅ Sheets ready!','ok');})
+  gsr.withSuccessHandler(function(){toast('✅ Sheets ready!','ok');})
     .withFailureHandler(function(e){toast('Error: '+(e.message||''),'err');}).setupSheets();
 }
 
 function chkConn(){
-  google.script.run.withSuccessHandler(function(){toast('✅ Connected!','ok');document.getElementById('cDot').style.background='#4ade80';})
+  gsr.withSuccessHandler(function(){toast('✅ Connected!','ok');document.getElementById('cDot').style.background='#4ade80';})
     .withFailureHandler(function(){toast('Cannot connect','err');document.getElementById('cDot').style.background='#f87171';}).getSettings();
 }
 
