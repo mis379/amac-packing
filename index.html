@@ -670,13 +670,102 @@ function loadCutlist() {
 function uploadCSV(inp) {
   var file = inp.files[0];
   if (!file) return;
-  toast('Uploading...', 'info');
+  toast('Reading file...', 'info');
+  
   var reader = new FileReader();
   reader.onload = function(e) {
-    apiPost('uploadCutlist', { csv: e.target.result, orderId: S.order.OrderID }, function(res) {
-      toast('✅ ' + res.count + ' panels loaded!', 'ok');
-      loadCutlist();
-    }, function(err) { toast('Upload error', 'err'); });
+    var csvText = e.target.result;
+    var orderId = S.order.OrderID;
+    
+    // Parse CSV in browser, send rows in chunks via GET
+    var delimiter = csvText.split('\n')[0].indexOf(';') >= 0 ? ';' : ',';
+    var lines = csvText.trim().split('\n');
+    var headers = lines[0].split(delimiter).map(function(h) { return h.trim().replace(/"/g,'').toLowerCase(); });
+    
+    function findCol(aliases) {
+      for (var a = 0; a < aliases.length; a++) {
+        var idx = headers.indexOf(aliases[a]);
+        if (idx !== -1) return idx;
+      }
+      return -1;
+    }
+    
+    var cols = {
+      barcode: findCol(['barcode']),
+      cnc1: findCol(['cnc_1']),
+      cnc2: findCol(['cnc_2']),
+      partname: findCol(['partname','part_name']),
+      artdesc: findCol(['art_desc','artdesc']),
+      matname: findCol(['matname','material']),
+      cleng: findCol(['cleng','finishlength','l1']),
+      cwidth: findCol(['cwidth','finishwidth','finishwitdh','w1']),
+      thickness: findCol(['finishthickness','cut_thk','thickness'])
+    };
+    
+    var rows = [];
+    for (var i = 1; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+      var vals = line.split(delimiter).map(function(v) { return v.trim().replace(/"/g,'').replace(/
+/g,''); });
+      
+      var barcode = cols.barcode >= 0 ? vals[cols.barcode] : '';
+      var cnc1 = cols.cnc1 >= 0 ? vals[cols.cnc1] : '';
+      var cnc2 = cols.cnc2 >= 0 ? vals[cols.cnc2] : '';
+      var partname = cols.partname >= 0 ? vals[cols.partname] : '';
+      var artdesc = cols.artdesc >= 0 ? vals[cols.artdesc] : '';
+      var matname = cols.matname >= 0 ? vals[cols.matname] : '';
+      var l1 = cols.cleng >= 0 ? vals[cols.cleng] : '';
+      var w1 = cols.cwidth >= 0 ? vals[cols.cwidth] : '';
+      var thickness = cols.thickness >= 0 ? vals[cols.thickness] : '';
+      
+      if (!barcode) continue;
+      
+      rows.push([barcode, partname, artdesc, matname, l1, w1, thickness]);
+      if (cnc1 && cnc1 !== barcode) rows.push([cnc1, partname, artdesc, matname, l1, w1, thickness]);
+      if (cnc2 && cnc2 !== barcode && cnc2 !== cnc1) rows.push([cnc2, partname, artdesc, matname, l1, w1, thickness]);
+    }
+    
+    // Send all rows via GET in chunks of 50
+    var CHUNK = 50;
+    var total = rows.length;
+    var sent = 0;
+    
+    toast('Uploading ' + total + ' panels...', 'info');
+    
+    function sendChunk(start) {
+      if (start >= rows.length) {
+        // All done
+        api('finalizeCutlist', { orderId: orderId, count: Math.floor(total/2) }, function() {
+          toast('✅ ' + total + ' entries loaded!', 'ok');
+          loadCutlist();
+        }, function() {
+          toast('✅ Upload done!', 'ok');
+          loadCutlist();
+        });
+        return;
+      }
+      
+      var chunk = rows.slice(start, start + CHUNK);
+      var url = GAS_URL + '?fn=insertRows&orderId=' + encodeURIComponent(orderId) + 
+                '&rows=' + encodeURIComponent(JSON.stringify(chunk)) +
+                '&clear=' + (start === 0 ? '1' : '0');
+      
+      fetch(url)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          sent += chunk.length;
+          var pct = Math.round(sent / rows.length * 100);
+          toast('Uploading... ' + pct + '%', 'info');
+          sendChunk(start + CHUNK);
+        })
+        .catch(function(e) {
+          // Try next chunk anyway
+          sendChunk(start + CHUNK);
+        });
+    }
+    
+    sendChunk(0);
   };
   reader.readAsText(file);
 }
