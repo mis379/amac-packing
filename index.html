@@ -144,6 +144,7 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 .empty-txt { font-size:15px; font-weight:600; }
 .empty-sub { font-size:13px; margin-top:4px; }
 
+@keyframes scanAnim { 0%,100%{top:15%} 50%{top:80%} }
 .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; gap:12px; color:var(--muted); }
 .spin { width:30px; height:30px; border:3px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation:spin 0.8s linear infinite; }
 @keyframes spin { to{transform:rotate(360deg)} }
@@ -393,12 +394,22 @@ function drawPack() {
       '</div>' +
       '<div id="panelList">' + renderPanelList() + '</div>' +
     '</div>' +
-    '<div style="background:#1a1a2e;border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">' +
-      '<div style="color:white;font-size:14px;font-weight:600;margin-bottom:12px;">📷 SCAN PANEL BARCODE</div>' +
+    '<div style="background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;">' +
+      '<div style="color:white;font-size:13px;font-weight:700;text-align:center;margin-bottom:12px;letter-spacing:1px;">📷 SCAN PANEL BARCODE</div>' +
+      '<div style="position:relative;width:100%;max-width:340px;height:160px;margin:0 auto 12px;border:2px solid #1a8a7a;border-radius:10px;overflow:hidden;background:black;" id="camBox">' +
+        '<video id="camVid" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;"></video>' +
+        '<div id="camOverlay" style="position:absolute;left:5%;right:5%;top:50%;height:2px;background:#1a8a7a;box-shadow:0 0 8px #1a8a7a;display:none;animation:scanAnim 2s ease-in-out infinite;"></div>' +
+        '<div id="camPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4);font-size:12px;text-align:center;padding:10px;">Camera band hai<br>Start tap karo</div>' +
+      '</div>' +
+      '<div id="camStatus" style="color:#1a8a7a;font-size:12px;font-weight:600;text-align:center;margin-bottom:10px;">Camera ready...</div>' +
+      '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">' +
+        '<button onclick="startScan()" id="camStartBtn" style="background:#1a8a7a;color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">📷 Start Camera</button>' +
+        '<button onclick="stopScan()" id="camStopBtn" style="background:#444;color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;display:none;">⏹ Stop</button>' +
+      '</div>' +
       '<input type="text" id="barcodeInput" placeholder="Barcode scan here..." ' +
-        'style="width:100%;padding:14px;font-size:16px;border-radius:8px;border:2px solid #1a8a7a;background:white;text-align:center;" ' +
-        'oninput="handleBarcodeInput(this.value)" autofocus/>' +
-      '<div style="color:rgba(255,255,255,0.6);font-size:12px;margin-top:8px">Agar aapke paas barcode scanner gun hai toh usse scan karo<br>Ya neeche manually type karo</div>' +
+        'style="width:100%;padding:12px 14px;font-size:15px;border-radius:8px;border:2px solid #1a8a7a;background:white;text-align:center;" ' +
+        'oninput="handleBarcodeInput(this.value)"/>' +
+      '<div style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:8px;text-align:center">Scanner gun se bhi scan kar sakte ho</div>' +
     '</div>' +
     '<div class="manual-box">' +
       '<div class="manual-lbl">YA MANUALLY TYPE KARO</div>' +
@@ -427,7 +438,6 @@ function renderPanelList() {
 // ── CAMERA ─────────────────────────────────────────────
 var barcodeTimer = null;
 function handleBarcodeInput(val) {
-  // Auto-submit after 500ms of no typing (scanner sends code instantly)
   clearTimeout(barcodeTimer);
   if (!val || val.length < 3) return;
   barcodeTimer = setTimeout(function() {
@@ -438,6 +448,111 @@ function handleBarcodeInput(val) {
 }
 
 function toggleCam() {}
+
+var camStream = null;
+var camScanning = false;
+var lastScan = null;
+var scanCanvas = document.createElement('canvas');
+var scanCtx = scanCanvas.getContext('2d');
+
+function startScan() {
+  if (!navigator.mediaDevices) { 
+    alert('Camera not supported. Please use HTTPS.');
+    return; 
+  }
+  navigator.mediaDevices.getUserMedia({ 
+    video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } } 
+  }).then(function(stream) {
+    camStream = stream;
+    camScanning = true;
+    var vid = document.getElementById('camVid');
+    var ph = document.getElementById('camPlaceholder');
+    var ov = document.getElementById('camOverlay');
+    var stat = document.getElementById('camStatus');
+    var startBtn = document.getElementById('camStartBtn');
+    var stopBtn = document.getElementById('camStopBtn');
+    if (vid) { vid.srcObject = stream; vid.style.display = 'block'; }
+    if (ph) ph.style.display = 'none';
+    if (ov) ov.style.display = 'block';
+    if (stat) stat.textContent = '🟢 Scanning...';
+    if (startBtn) startBtn.style.display = 'none';
+    if (stopBtn) stopBtn.style.display = 'inline-block';
+    
+    // Load ZXing dynamically
+    if (!window.ZXingLoaded) {
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.1/zxing.min.js';
+      s.onload = function() { 
+        window.ZXingLoaded = true; 
+        doScanLoop(); 
+      };
+      document.head.appendChild(s);
+    } else {
+      doScanLoop();
+    }
+  }).catch(function(err) {
+    var stat = document.getElementById('camStatus');
+    if (stat) stat.textContent = 'Error: ' + err.message;
+    alert('Camera error: ' + err.message);
+  });
+}
+
+function stopScan() {
+  camScanning = false;
+  if (camStream) { camStream.getTracks().forEach(function(t){t.stop();}); camStream = null; }
+  var vid = document.getElementById('camVid');
+  var ph = document.getElementById('camPlaceholder');
+  var ov = document.getElementById('camOverlay');
+  var stat = document.getElementById('camStatus');
+  var startBtn = document.getElementById('camStartBtn');
+  var stopBtn = document.getElementById('camStopBtn');
+  if (vid) { vid.srcObject = null; vid.style.display = 'none'; }
+  if (ph) ph.style.display = 'flex';
+  if (ov) ov.style.display = 'none';
+  if (stat) stat.textContent = 'Camera stopped';
+  if (startBtn) startBtn.style.display = 'inline-block';
+  if (stopBtn) stopBtn.style.display = 'none';
+}
+
+function doScanLoop() {
+  if (!camScanning) return;
+  var vid = document.getElementById('camVid');
+  if (!vid || vid.readyState < 2) { setTimeout(doScanLoop, 200); return; }
+  
+  try {
+    if (window.ZXing) {
+      scanCanvas.width = vid.videoWidth;
+      scanCanvas.height = vid.videoHeight;
+      scanCtx.drawImage(vid, 0, 0);
+      var hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+        ZXing.BarcodeFormat.CODE_128,
+        ZXing.BarcodeFormat.CODE_39,
+        ZXing.BarcodeFormat.EAN_13,
+        ZXing.BarcodeFormat.EAN_8
+      ]);
+      var reader = new ZXing.MultiFormatReader();
+      reader.setHints(hints);
+      var lum = new ZXing.HTMLCanvasElementLuminanceSource(scanCanvas);
+      var bin = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
+      var result = reader.decode(bin);
+      if (result && result.text) {
+        var code = result.text;
+        if (code !== lastScan && code.length > 3) {
+          lastScan = code;
+          var stat = document.getElementById('camStatus');
+          if (stat) stat.textContent = '✅ Scanned: ' + code;
+          // Beep
+          try { var c=new AudioContext(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=1000;g.gain.value=0.2;o.start();o.stop(c.currentTime+0.1); } catch(e){}
+          doPanel(code);
+          setTimeout(function(){ lastScan = null; }, 3000);
+        }
+      }
+    }
+  } catch(e) { /* no barcode yet */ }
+  
+  requestAnimationFrame(doScanLoop);
+}
 
 function startCam() {}
 
