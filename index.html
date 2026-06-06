@@ -204,7 +204,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fa;color:#1a1a2e}
 <div class="toast" id="toast"></div>
 
 <script>
-// GAS_URL defined above
+
 
 // Detect if running inside GAS or GitHub Pages
 function isGAS() { 
@@ -222,7 +222,7 @@ function gasCall(fn, params, onSuccess, onError) {
     runner[fn].apply(runner, params || []);
   } else {
     // Fetch call from GitHub Pages
-    var url = GAS + '?fn=' + encodeURIComponent(fn);
+    var url = GAS_URL + '?fn=' + encodeURIComponent(fn);
     if (params && params.length > 0) {
       url += '&args=' + encodeURIComponent(JSON.stringify(params));
     }
