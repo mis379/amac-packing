@@ -4,1025 +4,721 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>AMAC Packing System</title>
-
 <style>
-:root {
-  --teal: #1a8a7a;
-  --teal-dark: #156b5e;
-  --teal-light: #e8f7f5;
-  --danger: #e74c3c;
-  --success: #27ae60;
-  --accent: #f0a500;
-  --text: #1a1a2e;
-  --muted: #6b7280;
-  --bg: #f5f7fa;
-  --border: #e2e8f0;
-  --shadow: 0 2px 12px rgba(0,0,0,0.08);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f5f7fa;color:#1a1a2e}
+.hdr{background:#1a8a7a;color:white;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.logo{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;margin-right:10px;flex-shrink:0}
+.htitle{font-size:16px;font-weight:700}
+.hsub{font-size:11px;opacity:.8}
+.sbadge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;border:none;color:white}
+.dot{width:8px;height:8px;border-radius:50%;background:#f87171}
+.jbar{background:#156b5e;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;min-height:46px}
+.jbar p{color:rgba(255,255,255,.75);font-size:13px}
+.jname{color:white;font-size:15px;font-weight:700}
+.jmeta{color:rgba(255,255,255,.75);font-size:12px}
+.bedit{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 10px;cursor:pointer;position:relative;background:none;border:none}
+.ni .ico{font-size:22px}
+.ni .lbl{font-size:10px;font-weight:600;color:#6b7280;margin-top:2px}
+.ni.on .lbl{color:#1a8a7a}
+.ni.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:#1a8a7a;border-radius:0 0 4px 4px}
+.pg{display:none;padding:16px;padding-bottom:85px;min-height:calc(100vh - 102px)}
+.pg.on{display:block}
+.card{background:white;border-radius:12px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:12px}
+.ctitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;margin-bottom:12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;width:100%}
+.btn-p{background:#1a8a7a;color:white}
+.btn-s{background:#e8f7f5;color:#1a8a7a}
+.btn-o{background:transparent;border:1.5px solid #e2e8f0;color:#6b7280}
+.bsm{padding:8px 14px;font-size:13px;width:auto;border-radius:8px}
+.ig{margin-bottom:14px}
+.lbl2{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;margin-bottom:5px}
+.inp{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#1a1a2e;background:white}
+.inp:focus{outline:none;border-color:#1a8a7a}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sc{background:white;border-radius:12px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);text-align:center}
+.sn{font-size:28px;font-weight:800;color:#1a8a7a}
+.sl{font-size:11px;color:#6b7280;font-weight:600}
+.cw{display:flex;justify-content:center;margin:16px 0}
+.circ{width:130px;height:130px;border-radius:50%;border:6px solid #e2e8f0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cn{font-size:38px;font-weight:800}
+.ct{font-size:13px;color:#6b7280}
+.cr{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{padding:6px 14px;background:#e8f7f5;color:#1a8a7a;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:none}
+.chip.on{background:#1a8a7a;color:white}
+.pr{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #e2e8f0;gap:10px}
+.pr:last-child{border-bottom:none}
+.pn{width:24px;font-size:12px;color:#6b7280;font-weight:600}
+.pid{flex:1;font-size:13px;font-weight:700}
+.ptyp{flex:1;font-size:12px;color:#6b7280}
+.pdim{font-size:12px;color:#1a8a7a;font-weight:600}
 
-.header { background: var(--teal); color: white; padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-.logo { width:36px; height:36px; background:rgba(255,255,255,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; margin-right:10px; }
-.h-title { font-size:16px; font-weight:700; }
-.h-sub { font-size:11px; opacity:0.8; }
-.sheets-badge { background:rgba(255,255,255,0.2); border-radius:20px; padding:4px 12px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:5px; cursor:pointer; border:none; color:white; }
-.dot { width:8px; height:8px; border-radius:50%; background:#f87171; }
+/* CAMERA */
+.cambox{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px}
+.camframe{width:100%;max-width:320px;height:160px;margin:0 auto 12px;border:2px solid #1a8a7a;border-radius:10px;overflow:hidden;background:black;position:relative;display:flex;align-items:center;justify-content:center}
+.camframe video{width:100%;height:100%;object-fit:cover;display:none}
+.camline{position:absolute;left:5%;right:5%;height:2px;background:#1a8a7a;box-shadow:0 0 8px #1a8a7a;display:none;animation:scan 2s ease-in-out infinite}
+@keyframes scan{0%,100%{top:15%}50%{top:82%}}
+.camph{color:rgba(255,255,255,.4);font-size:12px;text-align:center}
+.camstat{color:#1a8a7a;font-size:12px;font-weight:600;text-align:center;margin-bottom:10px;min-height:18px}
+.cambtn{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.cbtn{padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;border:none;font-size:13px}
+.cbtn-start{background:#1a8a7a;color:white}
+.cbtn-stop{background:#555;color:white;display:none}
+.manbox{background:white;border-radius:10px;padding:12px;margin-bottom:10px}
+.manlbl{font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:8px}
+.manrow{display:flex;gap:8px}
+.maninp{flex:1;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:15px}
+.maninp:focus{outline:none;border-color:#1a8a7a}
+.manadd{background:#1a8a7a;color:white;padding:10px 16px;border:none;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap}
 
-.job-bar { background: var(--teal-dark); padding:10px 16px; display:flex; align-items:center; justify-content:space-between; min-height:46px; }
-.job-bar p { color:rgba(255,255,255,0.75); font-size:13px; }
-.job-name { color:white; font-size:15px; font-weight:700; }
-.job-meta { color:rgba(255,255,255,0.75); font-size:12px; }
-.btn-edit { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:white; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; }
+/* RESULT */
+.res{border-radius:12px;padding:16px;margin-bottom:10px;border:2px solid #e2e8f0;background:white}
+.res.warn{border-color:#fbbf24}
+.res.ok{border-color:#27ae60}
+.res.dup{border-color:#1a8a7a}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:8px}
+.bw{background:#fef3c7;color:#92400e}
+.bo{background:#dcfce7;color:#166534}
+.bd{background:#dbeafe;color:#1e40af}
+.rid{font-size:22px;font-weight:800;margin-bottom:4px;word-break:break-all}
+.rsub{font-size:13px;color:#6b7280;margin-bottom:10px}
+.dims{background:#1a1a2e;color:white;border-radius:8px;padding:10px;text-align:center;font-size:14px;margin-bottom:10px}
+.dims span{color:#1a8a7a}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.mi{background:#f5f7fa;border-radius:8px;padding:8px 10px}
+.mk{font-size:10px;font-weight:700;text-transform:uppercase;color:#6b7280}
+.mv{font-size:13px;font-weight:600;margin-top:2px}
 
-.bottom-nav { position:fixed; bottom:0; left:0; right:0; background:white; border-top:1px solid var(--border); display:flex; z-index:100; box-shadow:0 -2px 8px rgba(0,0,0,0.06); }
-.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:8px 4px 10px; cursor:pointer; position:relative; background:none; border:none; }
-.nav-item .ni { font-size:22px; }
-.nav-item .nl { font-size:10px; font-weight:600; color:var(--muted); margin-top:2px; }
-.nav-item.active .nl { color:var(--teal); }
-.nav-item.active::after { content:''; position:absolute; top:0; left:20%; right:20%; height:2px; background:var(--teal); border-radius:0 0 4px 4px; }
+/* ORDER LIST */
+.oi{background:white;border-radius:12px;padding:14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.on2{font-size:15px;font-weight:700}
+.om{font-size:12px;color:#6b7280;margin-top:2px}
+.pb{height:4px;background:#e2e8f0;border-radius:4px;margin-top:8px}
+.pf{height:100%;background:#1a8a7a;border-radius:4px}
+.stag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.sa{background:#dcfce7;color:#166534}
+.sp{background:#dbeafe;color:#1e40af}
+.sm{background:#fef3c7;color:#92400e}
 
-.page { display:none; padding:16px; padding-bottom:85px; min-height:calc(100vh - 102px); }
-.page.active { display:block; }
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.mbg.on{display:flex}
+.modal{background:white;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mh{width:36px;height:4px;background:#e2e8f0;border-radius:4px;margin:0 auto 16px}
+.mt{font-size:18px;font-weight:800;margin-bottom:14px}
 
-.card { background:white; border-radius:12px; padding:16px; box-shadow:var(--shadow); margin-bottom:12px; }
-.card-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:12px; }
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:16px;right:16px;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;color:white;z-index:300;display:none;text-align:center}
+.toast.on{display:block;animation:fadeUp .3s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tok{background:#27ae60}.terr{background:#e74c3c}.tinfo{background:#1a8a7a}.twarn{background:#f0a500}
 
-.btn { display:flex; align-items:center; justify-content:center; gap:6px; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; border:none; width:100%; }
-.btn-primary { background:var(--teal); color:white; }
-.btn-secondary { background:var(--teal-light); color:var(--teal); }
-.btn-outline { background:transparent; border:1.5px solid var(--border); color:var(--muted); }
-.btn-sm { padding:8px 14px; font-size:13px; width:auto; border-radius:8px; }
-
-.input-grp { margin-bottom:14px; }
-.lbl { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px; color:var(--muted); margin-bottom:5px; }
-.inp { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; color:var(--text); background:white; }
-.inp:focus { outline:none; border-color:var(--teal); }
-
-.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-.stat-card { background:white; border-radius:12px; padding:14px; box-shadow:var(--shadow); text-align:center; }
-.stat-num { font-size:28px; font-weight:800; color:var(--teal); }
-.stat-lbl { font-size:11px; color:var(--muted); font-weight:600; }
-
-.circle-wrap { display:flex; justify-content:center; margin:16px 0; }
-.circle { width:130px; height:130px; border-radius:50%; border:6px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.c-num { font-size:38px; font-weight:800; }
-.c-total { font-size:13px; color:var(--muted); }
-
-.chip-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-.chip { padding:6px 14px; background:var(--teal-light); color:var(--teal); border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:none; }
-.chip.active { background:var(--teal); color:white; }
-
-.panel-row { display:flex; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); gap:10px; }
-.panel-row:last-child { border-bottom:none; }
-.pr-num { width:24px; font-size:12px; color:var(--muted); font-weight:600; }
-.pr-id { flex:1; font-size:13px; font-weight:700; }
-.pr-type { flex:1; font-size:12px; color:var(--muted); }
-.pr-dim { font-size:12px; color:var(--teal); font-weight:600; }
-.pr-status { width:20px; text-align:center; }
-
-.scan-area { background:#1a1a2e; border-radius:12px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:12px; }
-.scan-frame { width:100%; max-width:300px; height:150px; border:2px solid var(--teal); border-radius:10px; overflow:hidden; background:black; display:flex; align-items:center; justify-content:center; position:relative; }
-.scan-frame video { width:100%; height:100%; object-fit:cover; display:none; }
-.scan-hint-txt { color:rgba(255,255,255,0.5); font-size:12px; text-align:center; }
-.cam-status { color:var(--teal); font-size:12px; font-weight:600; text-align:center; }
-.scan-line { position:absolute; left:5%; right:5%; height:2px; background:var(--teal); box-shadow:0 0 8px var(--teal); display:none; animation:scanAnim 2s ease-in-out infinite; }
-@keyframes scanAnim { 0%,100%{top:15%} 50%{top:80%} }
-
-.manual-box { background:white; border-radius:10px; padding:12px; margin-bottom:10px; }
-.manual-lbl { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-.manual-row { display:flex; gap:8px; }
-.manual-inp { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; }
-.manual-inp:focus { outline:none; border-color:var(--teal); }
-.btn-add-m { background:var(--teal); color:white; padding:10px 16px; border:none; border-radius:8px; font-weight:700; cursor:pointer; white-space:nowrap; }
-
-.result-card { border-radius:12px; padding:16px; margin-bottom:10px; border:2px solid var(--border); background:white; }
-.result-card.warn { border-color:#fbbf24; }
-.result-card.ok { border-color:var(--success); }
-.result-card.dup { border-color:var(--teal); }
-.badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; margin-bottom:8px; }
-.badge-warn { background:#fef3c7; color:#92400e; }
-.badge-ok { background:#dcfce7; color:#166634; }
-.badge-dup { background:#dbeafe; color:#1e40af; }
-.res-id { font-size:24px; font-weight:800; margin-bottom:4px; word-break:break-all; }
-.res-sub { font-size:13px; color:var(--muted); margin-bottom:10px; }
-.dims-bar { background:#1a1a2e; color:white; border-radius:8px; padding:10px; text-align:center; font-size:14px; margin-bottom:10px; }
-.dims-bar span { color:var(--teal); }
-.meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
-.meta-item { background:var(--bg); border-radius:8px; padding:8px 10px; }
-.mk { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); }
-.mv { font-size:13px; font-weight:600; margin-top:2px; }
-.action-row { display:flex; gap:10px; }
-
-.order-item { background:white; border-radius:12px; padding:14px; margin-bottom:8px; box-shadow:var(--shadow); cursor:pointer; display:flex; align-items:center; justify-content:space-between; }
-.o-name { font-size:15px; font-weight:700; }
-.o-meta { font-size:12px; color:var(--muted); margin-top:2px; }
-.prog-bar { height:4px; background:var(--border); border-radius:4px; margin-top:8px; }
-.prog-fill { height:100%; background:var(--teal); border-radius:4px; }
-.status-tag { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
-.s-active { background:#dcfce7; color:#166634; }
-.s-packed { background:#dbeafe; color:#1e40af; }
-.s-partial { background:#fef3c7; color:#92400e; }
-
-.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:flex-end; }
-.modal-bg.open { display:flex; }
-.modal { background:white; border-radius:20px 20px 0 0; padding:20px; width:100%; max-height:88vh; overflow-y:auto; animation:slideUp 0.3s ease; }
-@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-.modal-handle { width:36px; height:4px; background:var(--border); border-radius:4px; margin:0 auto 16px; }
-.modal-title { font-size:18px; font-weight:800; margin-bottom:14px; }
-
-.toast { position:fixed; bottom:90px; left:16px; right:16px; padding:12px 16px; border-radius:10px; font-size:14px; font-weight:600; color:white; z-index:300; display:none; text-align:center; }
-.toast.show { display:block; animation:fadeUp 0.3s; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.t-ok { background:var(--success); }
-.t-err { background:var(--danger); }
-.t-info { background:var(--teal); }
-.t-warn { background:var(--accent); }
-
-.empty { text-align:center; padding:40px 20px; color:var(--muted); }
-.empty-ico { font-size:48px; margin-bottom:12px; }
-.empty-txt { font-size:15px; font-weight:600; }
-.empty-sub { font-size:13px; margin-top:4px; }
-
-@keyframes scanAnim { 0%,100%{top:15%} 50%{top:80%} }
-.loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; gap:12px; color:var(--muted); }
-.spin { width:30px; height:30px; border:3px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation:spin 0.8s linear infinite; }
-@keyframes spin { to{transform:rotate(360deg)} }
+.empty{text-align:center;padding:40px 20px;color:#6b7280}
+.eico{font-size:48px;margin-bottom:12px}
+.etxt{font-size:15px;font-weight:600}
+.esub{font-size:13px;margin-top:4px}
+.spin{width:30px;height:30px;border:3px solid #e2e8f0;border-top-color:#1a8a7a;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld{display:flex;flex-direction:column;align-items:center;padding:40px;gap:12px;color:#6b7280}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div style="display:flex;align-items:center;">
+<div class="hdr">
+  <div style="display:flex;align-items:center">
     <div class="logo">AM</div>
-    <div>
-      <div class="h-title">Packing System</div>
-      <div class="h-sub" id="hSub">Kitchens &amp; Wardrobes</div>
-    </div>
+    <div><div class="htitle">Packing System</div><div class="hsub" id="hSub">Kitchens &amp; Wardrobes</div></div>
   </div>
-  <button class="sheets-badge" onclick="checkConn()">
-    <div class="dot" id="connDot"></div>Sheets
-  </button>
+  <button class="sbadge" onclick="chkConn()"><div class="dot" id="cDot"></div>Sheets</button>
 </div>
 
-<!-- JOB BAR -->
-<div class="job-bar" id="jobBar">
-  <p>No job selected — tap Pack to select a job</p>
+<div class="jbar" id="jBar"><p>No job selected — tap Pack to select</p></div>
+
+<div class="pg on" id="pg-pack"></div>
+<div class="pg" id="pg-cutlist"></div>
+<div class="pg" id="pg-label"></div>
+<div class="pg" id="pg-report"></div>
+<div class="pg" id="pg-setup"></div>
+
+<div class="bnav">
+  <button class="ni on" id="nav-pack" onclick="goTo('pack')"><div class="ico">📦</div><div class="lbl">Pack</div></button>
+  <button class="ni" id="nav-cutlist" onclick="goTo('cutlist')"><div class="ico">📋</div><div class="lbl">Cutlist</div></button>
+  <button class="ni" id="nav-label" onclick="goTo('label')"><div class="ico">🏷️</div><div class="lbl">Label</div></button>
+  <button class="ni" id="nav-report" onclick="goTo('report')"><div class="ico">📊</div><div class="lbl">Report</div></button>
+  <button class="ni" id="nav-setup" onclick="goTo('setup')"><div class="ico">⚙️</div><div class="lbl">Setup</div></button>
 </div>
 
-<!-- PAGES -->
-<div class="page active" id="pg-pack"></div>
-<div class="page" id="pg-cutlist"></div>
-<div class="page" id="pg-label"></div>
-<div class="page" id="pg-report"></div>
-<div class="page" id="pg-setup"></div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <button class="nav-item active" id="nav-pack" onclick="goPage('pack')">
-    <div class="ni">📦</div><div class="nl">Pack</div>
-  </button>
-  <button class="nav-item" id="nav-cutlist" onclick="goPage('cutlist')">
-    <div class="ni">📋</div><div class="nl">Cutlist</div>
-  </button>
-  <button class="nav-item" id="nav-label" onclick="goPage('label')">
-    <div class="ni">🏷️</div><div class="nl">Label</div>
-  </button>
-  <button class="nav-item" id="nav-report" onclick="goPage('report')">
-    <div class="ni">📊</div><div class="nl">Report</div>
-  </button>
-  <button class="nav-item" id="nav-setup" onclick="goPage('setup')">
-    <div class="ni">⚙️</div><div class="nl">Setup</div>
-  </button>
-</div>
-
-<!-- MODAL: SELECT ORDER -->
-<div class="modal-bg" id="mOrders">
+<!-- ORDER MODAL -->
+<div class="mbg" id="mOrd">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div class="modal-title" style="margin:0">Select Customer</div>
-    </div>
-    <input class="inp" id="oSearch" placeholder="Search by name or order no..." oninput="searchOrders(this.value)" style="margin-bottom:12px"/>
-    <div id="oResults"><div class="loading"><div class="spin"></div><span>Loading...</span></div></div>
-    <div style="text-align:center;margin:12px 0;color:var(--muted);font-size:13px">— Ya naya order banao —</div>
-    <button class="btn btn-outline" onclick="openNewOrder()">+ Add New Order</button>
+    <div class="mh"></div>
+    <div class="mt">Select Customer</div>
+    <input class="inp" id="oSrch" placeholder="Search..." oninput="srchOrd(this.value)" style="margin-bottom:12px"/>
+    <div id="oList"><div class="ld"><div class="spin"></div></div></div>
+    <div style="text-align:center;margin:12px 0;color:#6b7280;font-size:13px">— Ya naya order —</div>
+    <button class="btn btn-o" onclick="openNew()">+ Add New Order</button>
   </div>
 </div>
 
-<!-- MODAL: NEW ORDER -->
-<div class="modal-bg" id="mNewOrder">
+<!-- NEW ORDER MODAL -->
+<div class="mbg" id="mNew">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">New Order</div>
-    <div class="input-grp">
-      <label class="lbl">Order No</label>
-      <input class="inp" id="nOrderNo" placeholder="e.g. O-AK 0026/348/12/2025"/>
-    </div>
-    <div class="input-grp">
-      <label class="lbl">Customer Name *</label>
-      <input class="inp" id="nCustName" placeholder="e.g. Shubham Ji"/>
-    </div>
-    <div class="input-grp">
-      <label class="lbl">Type</label>
-      <div class="chip-row" id="typeChips">
-        <button class="chip active" onclick="pickType(this,'Wardrobe')">Wardrobe</button>
-        <button class="chip" onclick="pickType(this,'Kitchen')">Kitchen</button>
-        <button class="chip" onclick="pickType(this,'Both')">Both</button>
-        <button class="chip" onclick="pickType(this,'Other')">Other</button>
+    <div class="mh"></div>
+    <div class="mt">New Order</div>
+    <div class="ig"><label class="lbl2">Order No</label><input class="inp" id="nNo" placeholder="e.g. O-AK 0026/348/12/2025"/></div>
+    <div class="ig"><label class="lbl2">Customer Name *</label><input class="inp" id="nName" placeholder="e.g. Shubham Ji"/></div>
+    <div class="ig">
+      <label class="lbl2">Type</label>
+      <div class="cr" id="typCh">
+        <button class="chip on" onclick="pickT(this,'Wardrobe')">Wardrobe</button>
+        <button class="chip" onclick="pickT(this,'Kitchen')">Kitchen</button>
+        <button class="chip" onclick="pickT(this,'Both')">Both</button>
+        <button class="chip" onclick="pickT(this,'Other')">Other</button>
       </div>
     </div>
-    <div class="input-grp">
-      <label class="lbl">Address</label>
-      <input class="inp" id="nAddr" placeholder="e.g. #332/6, Panchkula"/>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:4px">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('mNewOrder')">Cancel</button>
-      <button class="btn btn-primary btn-sm" style="flex:2" onclick="saveOrder()">Save Order</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: SEAL BOX -->
-<div class="modal-bg" id="mSeal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Seal Box</div>
-    <div class="input-grp">
-      <label class="lbl">Notes (optional)</label>
-      <input class="inp" id="sealNotes" placeholder="e.g. Fragile items"/>
-    </div>
+    <div class="ig"><label class="lbl2">Address</label><input class="inp" id="nAddr" placeholder="e.g. #332/6, Panchkula"/></div>
     <div style="display:flex;gap:10px">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('mSeal')">Cancel</button>
-      <button class="btn btn-primary btn-sm" style="flex:2" onclick="doSeal()">🔒 Seal Box</button>
+      <button class="btn btn-o bsm" onclick="closeM('mNew')">Cancel</button>
+      <button class="btn btn-p bsm" style="flex:2" onclick="saveOrd()">Save Order</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- SEAL MODAL -->
+<div class="mbg" id="mSeal">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt">Seal Box</div>
+    <div class="ig"><label class="lbl2">Notes (optional)</label><input class="inp" id="sNotes" placeholder="e.g. Fragile"/></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-o bsm" onclick="closeM('mSeal')">Cancel</button>
+      <button class="btn btn-p bsm" style="flex:2" onclick="doSeal()">🔒 Seal Box</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIG — APNA GAS URL YAHAN DAALO ──────────────────
-var GAS_URL = 'https://script.google.com/a/macros/amaccreato.com/s/AKfycbx45o0HYTLvgGyS9BNWhOZrx2qJKZQ_TnKzPXXR2g0RWC2P7w5s792EGApuscJpj5Ni/exec';
+var GAS = 'https://script.google.com/macros/s/AKfycbx45o0HYTLvgGyS9BNWhOZrx2qJKZQ_TnKzPXXR2g0RWC2P7w5s792EGApuscJpj5Ni/exec';
 
-// ── STATE ──────────────────────────────────────────────
-var S = {
-  order: null,
-  box: 'BOX-01',
-  packer: '',
-  boxPanels: [],
-  cutlist: [],
-  orderType: 'Wardrobe',
-  camStream: null,
-  scanning: false,
-  lastCode: null,
-  zxingReader: null
-};
+var S = { order:null, box:'BOX-01', packer:'', panels:[], cutlist:[], otype:'Wardrobe', stream:null, scanning:false, lastCode:null };
 
-// ── API CALL ───────────────────────────────────────────
-function api(fn, params, cb, errCb) {
-  var url = GAS_URL + '?fn=' + fn + '&' + objToQuery(params);
-  fetch(url)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.error) { if (errCb) errCb({message: data.error}); return; }
-      if (cb) cb(data.result !== undefined ? data.result : data);
-    })
-    .catch(function(e) { if (errCb) errCb(e); });
-}
-
-function apiPost(fn, body, cb, errCb) {
-  // Use GET with encoded data to avoid CORS issues
-  var url = GAS_URL + '?fn=' + fn + '&data=' + encodeURIComponent(JSON.stringify(body));
-  fetch(url)
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.error) { if (errCb) errCb({message: data.error}); return; }
-    if (cb) cb(data.result !== undefined ? data.result : data);
-  })
-  .catch(function(e) { if (errCb) errCb(e); });
-}
-
-function objToQuery(obj) {
-  if (!obj) return '';
-  return Object.keys(obj).map(function(k) {
-    return encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]);
-  }).join('&');
-}
-
-// ── BOOT ──────────────────────────────────────────────
+// ── BOOT
 window.onload = function() {
   drawPack();
-  loadSettings();
-  document.addEventListener('click', function(e) {
-    var modals = ['mOrders','mNewOrder','mSeal'];
-    for (var i = 0; i < modals.length; i++) {
-      var el = document.getElementById(modals[i]);
-      if (el && e.target === el) el.classList.remove('open');
-    }
-  });
+  google.script.run.withSuccessHandler(function(s){
+    S.packer = s.PackerName||'';
+    var e = document.getElementById('hSub');
+    if(e) e.textContent = (s.CompanyName||'AMAC')+' · '+(s.City||'Mohali');
+    document.getElementById('cDot').style.background = '#4ade80';
+  }).withFailureHandler(function(){
+    document.getElementById('cDot').style.background = '#f87171';
+  }).getSettings();
 };
 
-function loadSettings() {
-  api('getSettings', {}, function(s) {
-    S.packer = s.PackerName || '';
-    var el = document.getElementById('hSub');
-    if (el) el.textContent = (s.CompanyName || 'AMAC') + ' · ' + (s.City || 'Mohali');
-    document.getElementById('connDot').style.background = '#4ade80';
-  }, function() {
-    document.getElementById('connDot').style.background = '#f87171';
+// ── NAV
+function goTo(pg) {
+  ['pack','cutlist','label','report','setup'].forEach(function(p){
+    document.getElementById('pg-'+p).classList.remove('on');
+    document.getElementById('nav-'+p).classList.remove('on');
   });
+  document.getElementById('pg-'+pg).classList.add('on');
+  document.getElementById('nav-'+pg).classList.add('on');
+  if(pg==='pack') drawPack();
+  else if(pg==='cutlist') drawCutlist();
+  else if(pg==='label') drawLabel();
+  else if(pg==='report') drawReport();
+  else if(pg==='setup') drawSetup();
 }
 
-// ── NAVIGATION ─────────────────────────────────────────
-function goPage(name) {
-  var pages = ['pack','cutlist','label','report','setup'];
-  for (var i = 0; i < pages.length; i++) {
-    document.getElementById('pg-' + pages[i]).classList.remove('active');
-    document.getElementById('nav-' + pages[i]).classList.remove('active');
-  }
-  document.getElementById('pg-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'pack') drawPack();
-  else if (name === 'cutlist') drawCutlist();
-  else if (name === 'label') drawLabel();
-  else if (name === 'report') drawReport();
-  else if (name === 'setup') drawSetup();
+// ── JOB BAR
+function updBar() {
+  var b = document.getElementById('jBar');
+  if(!S.order){ b.innerHTML='<p>No job selected — tap Pack to select</p>'; return; }
+  var o=S.order;
+  b.innerHTML='<div><div class="jname">'+x(o.OrderNo)+'</div><div class="jmeta">'+x(o.CustomerName)+' · '+x(o.Type)+' · '+x(o.Address||'')+'</div></div><button class="bedit" onclick="openOrd()">Edit Job</button>';
 }
 
-// ── JOB BAR ────────────────────────────────────────────
-function updateJobBar() {
-  var bar = document.getElementById('jobBar');
-  if (!S.order) {
-    bar.innerHTML = '<p>No job selected — tap Pack to select a job</p>';
-    return;
-  }
-  var o = S.order;
-  bar.innerHTML = '<div><div class="job-name">' + esc(o.OrderNo) + '</div><div class="job-meta">' + esc(o.CustomerName) + ' · ' + esc(o.Type) + ' · ' + esc(o.Address||'') + '</div></div><button class="btn-edit" onclick="openOrders()">Edit Job</button>';
-}
+function x(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── PACK PAGE ──────────────────────────────────────────
+// ── PACK PAGE
 function drawPack() {
   var pg = document.getElementById('pg-pack');
-  updateJobBar();
-  if (!S.order) {
-    pg.innerHTML = '<div class="empty" style="margin-top:40px"><div class="empty-ico">📦</div><div class="empty-txt">No Job Selected</div><div class="empty-sub">Select an order to start packing</div><button class="btn btn-primary" style="margin-top:20px;max-width:240px" onclick="openOrders()">+ Select / Create Order</button></div>';
+  updBar();
+  if(!S.order){
+    pg.innerHTML='<div class="empty" style="margin-top:40px"><div class="eico">📦</div><div class="etxt">No Job Selected</div><div class="esub">Select an order to start</div><button class="btn btn-p" style="margin-top:20px;max-width:240px" onclick="openOrd()">+ Select / Create Order</button></div>';
     return;
   }
-  var total = parseInt(S.order.TotalPanels) || 0;
-  var boxChips = ['BOX-01','BOX-02','BOX-03','BOX-04','BOX-05','BOX-06','BOX-07','BOX-08','BOX-09','BOX-10'].map(function(b) {
-    return '<button class="chip ' + (b===S.box?'active':'') + '" onclick="switchBox(\'' + b + '\')">' + b + '</button>';
+  var total=parseInt(S.order.TotalPanels)||0;
+  var chips=['BOX-01','BOX-02','BOX-03','BOX-04','BOX-05','BOX-06','BOX-07','BOX-08','BOX-09','BOX-10'].map(function(b){
+    return '<button class="chip'+(b===S.box?' on':'')+'" onclick="swBox(\''+b+'\')">'+b+'</button>';
   }).join('');
 
-  pg.innerHTML =
-    '<div class="card" style="text-align:center">' +
-      '<div class="card-title">Current Box <span style="float:right;color:var(--teal)">' + S.box + '</span></div>' +
-      '<div class="circle-wrap"><div class="circle"><div class="c-num" id="cNum">' + S.boxPanels.length + '</div><div class="c-total">of ' + total + '</div></div></div>' +
-      '<div style="color:var(--muted);font-size:13px;font-weight:600">panels in box</div>' +
-      '<div class="chip-row" style="justify-content:center;margin-top:12px">' + boxChips + '</div>' +
-    '</div>' +
-    '<div class="card" style="padding:12px 14px">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
-        '<div class="card-title" style="margin:0">Panels in Box</div>' +
-        '<span style="color:var(--danger);font-size:13px;font-weight:600;cursor:pointer" onclick="clearBox()">Clear</span>' +
-      '</div>' +
-      '<div id="panelList">' + renderPanelList() + '</div>' +
-    '</div>' +
-    '<div style="background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;">' +
-      '<div style="color:white;font-size:13px;font-weight:700;text-align:center;margin-bottom:12px;letter-spacing:1px;">📷 SCAN PANEL BARCODE</div>' +
-      '<div style="position:relative;width:100%;max-width:340px;height:160px;margin:0 auto 12px;border:2px solid #1a8a7a;border-radius:10px;overflow:hidden;background:black;" id="camBox">' +
-        '<video id="camVid" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;"></video>' +
-        '<div id="camOverlay" style="position:absolute;left:5%;right:5%;top:50%;height:2px;background:#1a8a7a;box-shadow:0 0 8px #1a8a7a;display:none;animation:scanAnim 2s ease-in-out infinite;"></div>' +
-        '<div id="camPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4);font-size:12px;text-align:center;padding:10px;">Camera band hai<br>Start tap karo</div>' +
-      '</div>' +
-      '<div id="camStatus" style="color:#1a8a7a;font-size:12px;font-weight:600;text-align:center;margin-bottom:10px;">Camera ready...</div>' +
-      '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">' +
-        '<button onclick="startScan()" id="camStartBtn" style="background:#1a8a7a;color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">📷 Start Camera</button>' +
-        '<button onclick="stopScan()" id="camStopBtn" style="background:#444;color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;display:none;">⏹ Stop</button>' +
-      '</div>' +
-      '<input type="text" id="barcodeInput" placeholder="Barcode scan here..." ' +
-        'style="width:100%;padding:12px 14px;font-size:15px;border-radius:8px;border:2px solid #1a8a7a;background:white;text-align:center;" ' +
-        'oninput="handleBarcodeInput(this.value)"/>' +
-      '<div style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:8px;text-align:center">Scanner gun se bhi scan kar sakte ho</div>' +
-    '</div>' +
-    '<div class="manual-box">' +
-      '<div class="manual-lbl">YA MANUALLY TYPE KARO</div>' +
-      '<div class="manual-row">' +
-        '<input class="manual-inp" id="mInp" placeholder="Panel ID type karo" onkeydown="if(event.key===\'Enter\')doManual()"/>' +
-        '<button class="btn-add-m" onclick="doManual()">Add</button>' +
-      '</div>' +
-    '</div>' +
-    '<div id="resultArea"></div>' +
-    '<div style="display:flex;gap:10px;margin-top:8px">' +
-      '<button class="btn btn-outline btn-sm" onclick="openSeal()">🔒 Seal Box</button>' +
-      '<button class="btn btn-primary btn-sm" style="flex:1" onclick="nextBox()">Next Box →</button>' +
+  var plist='';
+  if(S.panels.length===0){
+    plist='<div class="empty" style="padding:20px"><div class="eico" style="font-size:32px">📦</div><div class="etxt">Scan first panel</div></div>';
+  } else {
+    for(var i=0;i<S.panels.length;i++){
+      var p=S.panels[i];
+      plist+='<div class="pr"><div class="pn">'+(i+1)+'</div><div class="pid">'+x(p.PanelID)+'</div><div class="ptyp">'+x(p.Module||p.Type||'—')+'</div><div class="pdim">'+x(p.L1||'—')+'×'+x(p.W1||'—')+'</div><div style="width:20px;text-align:center">✅</div></div>';
+    }
+  }
+
+  pg.innerHTML=
+    '<div class="card" style="text-align:center">'+
+      '<div class="ctitle">Current Box <span style="float:right;color:#1a8a7a">'+S.box+'</span></div>'+
+      '<div class="cw"><div class="circ"><div class="cn" id="cNum">'+S.panels.length+'</div><div class="ct">of '+total+'</div></div></div>'+
+      '<div style="color:#6b7280;font-size:13px;font-weight:600">panels in box</div>'+
+      '<div class="cr" style="justify-content:center;margin-top:12px">'+chips+'</div>'+
+    '</div>'+
+    '<div class="card" style="padding:12px 14px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+        '<div class="ctitle" style="margin:0">Panels in Box</div>'+
+        '<span style="color:#e74c3c;font-size:13px;font-weight:600;cursor:pointer" onclick="clearBox()">Clear</span>'+
+      '</div>'+
+      '<div id="pList">'+plist+'</div>'+
+    '</div>'+
+    // CAMERA
+    '<div class="cambox">'+
+      '<div style="color:white;font-size:13px;font-weight:700;text-align:center;margin-bottom:12px;letter-spacing:1px">📷 SCAN PANEL BARCODE</div>'+
+      '<div class="camframe" id="camFrame">'+
+        '<video id="camVid" autoplay playsinline muted></video>'+
+        '<div class="camline" id="camLine"></div>'+
+        '<div id="camPh" class="camph">Camera band hai<br><small>Start tap karo</small></div>'+
+      '</div>'+
+      '<div class="camstat" id="camStat">Camera ready</div>'+
+      '<div class="cambtn">'+
+        '<button class="cbtn cbtn-start" id="btnStart" onclick="startCam()">📷 Start Camera</button>'+
+        '<button class="cbtn cbtn-stop" id="btnStop" onclick="stopCam()">⏹ Stop</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="manbox">'+
+      '<div class="manlbl">Ya Manually Type Karo</div>'+
+      '<div class="manrow">'+
+        '<input class="maninp" id="mInp" placeholder="Panel ID type karo" onkeydown="if(event.key===\'Enter\')doMan()"/>'+
+        '<button class="manadd" onclick="doMan()">Add</button>'+
+      '</div>'+
+    '</div>'+
+    '<div id="resArea"></div>'+
+    '<div style="display:flex;gap:10px;margin-top:8px">'+
+      '<button class="btn btn-o bsm" onclick="openSeal()">🔒 Seal Box</button>'+
+      '<button class="btn btn-p bsm" style="flex:1" onclick="nxtBox()">Next Box →</button>'+
     '</div>';
 }
 
-function renderPanelList() {
-  if (S.boxPanels.length === 0) return '<div class="empty" style="padding:20px"><div class="empty-ico" style="font-size:32px">📦</div><div class="empty-txt">Scan first panel to begin</div></div>';
-  var html = '';
-  for (var i = 0; i < S.boxPanels.length; i++) {
-    var p = S.boxPanels[i];
-    html += '<div class="panel-row"><div class="pr-num">' + (i+1) + '</div><div class="pr-id">' + esc(p.PanelID) + '</div><div class="pr-type">' + esc(p.Module||p.Type||'—') + '</div><div class="pr-dim">' + esc(p.L1||'—') + '×' + esc(p.W1||'—') + '</div><div class="pr-status">✅</div></div>';
-  }
-  return html;
-}
-
-// ── CAMERA ─────────────────────────────────────────────
-var barcodeTimer = null;
-function handleBarcodeInput(val) {
-  clearTimeout(barcodeTimer);
-  if (!val || val.length < 3) return;
-  barcodeTimer = setTimeout(function() {
-    var inp = document.getElementById('barcodeInput');
-    if (inp) inp.value = '';
-    doPanel(val);
-  }, 300);
-}
-
-function toggleCam() {}
-
-var camStream = null;
-var camScanning = false;
-var lastScan = null;
-var scanCanvas = document.createElement('canvas');
-var scanCtx = scanCanvas.getContext('2d');
-
-function startScan() {
-  if (!navigator.mediaDevices) { 
-    alert('Camera not supported. Please use HTTPS.');
-    return; 
-  }
-  navigator.mediaDevices.getUserMedia({ 
-    video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } } 
-  }).then(function(stream) {
-    camStream = stream;
-    camScanning = true;
-    var vid = document.getElementById('camVid');
-    var ph = document.getElementById('camPlaceholder');
-    var ov = document.getElementById('camOverlay');
-    var stat = document.getElementById('camStatus');
-    var startBtn = document.getElementById('camStartBtn');
-    var stopBtn = document.getElementById('camStopBtn');
-    if (vid) { vid.srcObject = stream; vid.style.display = 'block'; }
-    if (ph) ph.style.display = 'none';
-    if (ov) ov.style.display = 'block';
-    if (stat) stat.textContent = '🟢 Scanning...';
-    if (startBtn) startBtn.style.display = 'none';
-    if (stopBtn) stopBtn.style.display = 'inline-block';
-    
-    // Load ZXing dynamically
-    if (!window.ZXingLoaded) {
-      var s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.1/zxing.min.js';
-      s.onload = function() { 
-        window.ZXingLoaded = true; 
-        doScanLoop(); 
-      };
-      document.head.appendChild(s);
-    } else {
-      doScanLoop();
-    }
-  }).catch(function(err) {
-    var stat = document.getElementById('camStatus');
-    if (stat) stat.textContent = 'Error: ' + err.message;
-    alert('Camera error: ' + err.message);
+// ── CAMERA
+function startCam() {
+  if(!navigator.mediaDevices){ toast('Camera not supported','err'); return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}})
+  .then(function(stream){
+    S.stream=stream; S.scanning=true;
+    var vid=document.getElementById('camVid');
+    var ph=document.getElementById('camPh');
+    var ln=document.getElementById('camLine');
+    if(vid){vid.srcObject=stream;vid.style.display='block';}
+    if(ph)ph.style.display='none';
+    if(ln)ln.style.display='block';
+    document.getElementById('btnStart').style.display='none';
+    document.getElementById('btnStop').style.display='inline-block';
+    document.getElementById('camStat').textContent='🟢 Camera active...';
+    loadZX();
+  }).catch(function(e){
+    toast('Camera error: '+e.message,'err');
   });
 }
 
-function stopScan() {
-  camScanning = false;
-  if (camStream) { camStream.getTracks().forEach(function(t){t.stop();}); camStream = null; }
-  var vid = document.getElementById('camVid');
-  var ph = document.getElementById('camPlaceholder');
-  var ov = document.getElementById('camOverlay');
-  var stat = document.getElementById('camStatus');
-  var startBtn = document.getElementById('camStartBtn');
-  var stopBtn = document.getElementById('camStopBtn');
-  if (vid) { vid.srcObject = null; vid.style.display = 'none'; }
-  if (ph) ph.style.display = 'flex';
-  if (ov) ov.style.display = 'none';
-  if (stat) stat.textContent = 'Camera stopped';
-  if (startBtn) startBtn.style.display = 'inline-block';
-  if (stopBtn) stopBtn.style.display = 'none';
+function stopCam(){
+  S.scanning=false;
+  if(S.stream){S.stream.getTracks().forEach(function(t){t.stop();});S.stream=null;}
+  var vid=document.getElementById('camVid');
+  var ph=document.getElementById('camPh');
+  var ln=document.getElementById('camLine');
+  if(vid){vid.srcObject=null;vid.style.display='none';}
+  if(ph){ph.style.display='flex';}
+  if(ln)ln.style.display='none';
+  var bs=document.getElementById('btnStart');
+  var bt=document.getElementById('btnStop');
+  var st=document.getElementById('camStat');
+  if(bs)bs.style.display='inline-block';
+  if(bt)bt.style.display='none';
+  if(st)st.textContent='Camera stopped';
 }
 
-function doScanLoop() {
-  if (!camScanning) return;
-  var vid = document.getElementById('camVid');
-  if (!vid || vid.readyState < 2) { setTimeout(doScanLoop, 200); return; }
-  
-  try {
-    if (window.ZXing) {
-      scanCanvas.width = vid.videoWidth;
-      scanCanvas.height = vid.videoHeight;
-      scanCtx.drawImage(vid, 0, 0);
-      var hints = new Map();
-      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-        ZXing.BarcodeFormat.CODE_128,
-        ZXing.BarcodeFormat.CODE_39,
-        ZXing.BarcodeFormat.EAN_13,
-        ZXing.BarcodeFormat.EAN_8
-      ]);
-      var reader = new ZXing.MultiFormatReader();
-      reader.setHints(hints);
-      var lum = new ZXing.HTMLCanvasElementLuminanceSource(scanCanvas);
-      var bin = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
-      var result = reader.decode(bin);
-      if (result && result.text) {
-        var code = result.text;
-        if (code !== lastScan && code.length > 3) {
-          lastScan = code;
-          var stat = document.getElementById('camStatus');
-          if (stat) stat.textContent = '✅ Scanned: ' + code;
-          // Beep
-          try { var c=new AudioContext(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=1000;g.gain.value=0.2;o.start();o.stop(c.currentTime+0.1); } catch(e){}
-          doPanel(code);
-          setTimeout(function(){ lastScan = null; }, 3000);
-        }
+function loadZX(){
+  if(window.ZXingLoaded){scanLoop();return;}
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.1/zxing.min.js';
+  s.onload=function(){window.ZXingLoaded=true;scanLoop();};
+  s.onerror=function(){document.getElementById('camStat').textContent='Scanner lib error - manually type';};
+  document.head.appendChild(s);
+}
+
+var scanCanvas=document.createElement('canvas');
+var scanCtx=scanCanvas.getContext('2d');
+var zxReader=null;
+
+function scanLoop(){
+  if(!S.scanning)return;
+  var vid=document.getElementById('camVid');
+  if(!vid||vid.readyState<2){setTimeout(scanLoop,200);return;}
+  if(window.ZXing){
+    try{
+      if(!zxReader){
+        var h=new Map();
+        h.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.CODE_128,ZXing.BarcodeFormat.CODE_39]);
+        zxReader=new ZXing.MultiFormatReader();
+        zxReader.setHints(h);
       }
-    }
-  } catch(e) { /* no barcode yet */ }
-  
-  requestAnimationFrame(doScanLoop);
-}
-
-function startCam() {}
-
-function stopCam() {}
-
-function initZXing() {}
-
-function doPanel(panelId) {
-  if (!S.order) { toast('Pehle order select karo!', 'warn'); return; }
-  var area = document.getElementById('resultArea');
-  if (area) area.innerHTML = '<div class="loading"><div class="spin"></div><span>Looking up...</span></div>';
-  apiPost('addPanelToBox', {
-    panelId: panelId,
-    orderId: S.order.OrderID,
-    boxNo: S.box,
-    packerName: S.packer
-  }, function(res) {
-    handlePanelResult(panelId, res);
-  }, function(e) {
-    if (area) area.innerHTML = '<div class="result-card warn"><div style="color:var(--danger);font-weight:600">Error: ' + esc(e.message||'Server error') + '</div></div>';
-    toast('Error adding panel', 'err');
-  });
-}
-
-function handlePanelResult(panelId, res) {
-  var area = document.getElementById('resultArea');
-  if (!area) return;
-  if (res.alreadyPacked) {
-    area.innerHTML = buildResultCard(panelId, res.panel, 'dup', 'Already Packed in ' + res.boxNo, '📦 Already Packed', 'badge-dup');
-    toast('Already packed in ' + res.boxNo, 'warn');
-    return;
+      scanCanvas.width=vid.videoWidth;
+      scanCanvas.height=vid.videoHeight;
+      scanCtx.drawImage(vid,0,0);
+      var lum=new ZXing.HTMLCanvasElementLuminanceSource(scanCanvas);
+      var bin=new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
+      var r=zxReader.decode(bin);
+      if(r&&r.text&&r.text!==S.lastCode){
+        S.lastCode=r.text;
+        document.getElementById('camStat').textContent='✅ '+r.text;
+        try{var ac=new AudioContext(),o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=1000;g.gain.value=0.2;o.start();o.stop(ac.currentTime+0.15);}catch(e){}
+        doPanel(r.text);
+        setTimeout(function(){S.lastCode=null;},3000);
+      }
+    }catch(e){}
   }
-  if (!res.panelExists) {
-    area.innerHTML = buildResultCard(panelId, null, 'warn', 'Not found in cutlist — added anyway', '⚠️ Not in Cutlist', 'badge-warn');
-    toast('Not in cutlist — added anyway', 'warn');
+  requestAnimationFrame(scanLoop);
+}
+
+// ── PANEL
+function doMan(){
+  var inp=document.getElementById('mInp');
+  var v=inp?inp.value.trim():'';
+  if(!v){toast('Panel ID khali hai!','warn');return;}
+  inp.value='';
+  doPanel(v);
+}
+
+function doPanel(id){
+  if(!S.order){toast('Pehle order select karo!','warn');return;}
+  var area=document.getElementById('resArea');
+  if(area)area.innerHTML='<div class="ld"><div class="spin"></div><span>Looking up...</span></div>';
+  google.script.run
+    .withSuccessHandler(function(res){showRes(id,res);})
+    .withFailureHandler(function(e){
+      if(area)area.innerHTML='<div class="res warn"><div style="color:#e74c3c;font-weight:600">Error: '+(e.message||'Server error')+'</div></div>';
+      toast('Error','err');
+    })
+    .addPanelToBox(id,S.order.OrderID,S.box,S.packer);
+}
+
+function showRes(id,res){
+  var area=document.getElementById('resArea');
+  if(!area)return;
+  if(res.alreadyPacked){
+    area.innerHTML=buildRes(id,res.panel,'dup','Already in '+res.boxNo,'📦 Already Packed','bd');
+    toast('Already in '+res.boxNo,'warn');return;
+  }
+  if(!res.panelExists){
+    area.innerHTML=buildRes(id,null,'warn','Not in cutlist','⚠️ Not in Cutlist','bw');
+    toast('Not in cutlist','warn');
   } else {
-    area.innerHTML = buildResultCard(panelId, res.panel, 'ok', 'Added to ' + S.box, '✅ Added', 'badge-ok');
-    toast('✅ Added to ' + S.box, 'ok');
+    area.innerHTML=buildRes(id,res.panel,'ok','Added to '+S.box,'✅ Added','bo');
+    toast('✅ Added to '+S.box,'ok');
   }
-  if (res.success) {
-    apiPost('getBoxPanels', { orderId: S.order.OrderID, boxNo: S.box }, function(panels) {
-      S.boxPanels = panels || [];
-      var list = document.getElementById('panelList');
-      var cnum = document.getElementById('cNum');
-      if (cnum) cnum.textContent = S.boxPanels.length;
-      if (list) list.innerHTML = renderPanelList();
-    }, function(){});
+  if(res.success){
+    google.script.run
+      .withSuccessHandler(function(ps){
+        S.panels=ps||[];
+        var cn=document.getElementById('cNum');
+        if(cn)cn.textContent=S.panels.length;
+        var pl=document.getElementById('pList');
+        if(pl)pl.innerHTML=renderPList();
+      }).withFailureHandler(function(){})
+      .getBoxPanels(S.order.OrderID,S.box);
   }
 }
 
-function buildResultCard(id, panel, cls, subtitle, badgeTxt, badgeCls) {
-  var p = panel || {};
-  var dims = esc(p.L1||'—') + ' × ' + esc(p.W1||'—') + ' × ' + esc(p.Thickness||'—');
-  return '<div class="result-card ' + cls + '">' +
-    '<span class="badge ' + badgeCls + '">' + badgeTxt + '</span>' +
-    '<div class="res-id">' + esc(id) + '</div>' +
-    '<div class="res-sub">' + subtitle + '</div>' +
-    '<div class="dims-bar"><span>' + dims + '</span><div style="font-size:11px;opacity:0.6;margin-top:2px">L × W × T (mm)</div></div>' +
-    '<div class="meta-grid">' +
-      '<div class="meta-item"><div class="mk">MATERIAL</div><div class="mv">' + esc(p.Material||'—') + '</div></div>' +
-      '<div class="meta-item"><div class="mk">FINISH</div><div class="mv">' + esc(p.Finish||'—') + '</div></div>' +
-      '<div class="meta-item"><div class="mk">MODULE</div><div class="mv">' + esc(p.Module||'—') + '</div></div>' +
-      '<div class="meta-item"><div class="mk">TYPE</div><div class="mv">' + esc(p.Type||'—') + '</div></div>' +
-    '</div>' +
-    '<div class="meta-grid">' +
-      '<div class="meta-item"><div class="mk">L1</div><div class="mv">' + esc(p.L1||'—') + '</div></div>' +
-      '<div class="meta-item"><div class="mk">L2</div><div class="mv">' + esc(p.L2||'—') + '</div></div>' +
-      '<div class="meta-item"><div class="mk">W1</div><div class="mv">' + esc(p.W1||'—') + '</div></div>' +
-      '<div class="meta-item"><div class="mk">W2</div><div class="mv">' + esc(p.W2||'—') + '</div></div>' +
+function buildRes(id,p,cls,sub,btxt,bcls){
+  p=p||{};
+  return '<div class="res '+cls+'">'+
+    '<span class="badge '+bcls+'">'+btxt+'</span>'+
+    '<div class="rid">'+x(id)+'</div>'+
+    '<div class="rsub">'+x(sub)+'</div>'+
+    '<div class="dims"><span>'+x(p.L1||'—')+' × '+x(p.W1||'—')+' × '+x(p.Thickness||'—')+'</span><div style="font-size:11px;opacity:.6;margin-top:2px">L × W × T (mm)</div></div>'+
+    '<div class="mg">'+
+      '<div class="mi"><div class="mk">MATERIAL</div><div class="mv">'+x(p.Material||'—')+'</div></div>'+
+      '<div class="mi"><div class="mk">FINISH</div><div class="mv">'+x(p.Finish||'—')+'</div></div>'+
+      '<div class="mi"><div class="mk">MODULE</div><div class="mv">'+x(p.Module||'—')+'</div></div>'+
+      '<div class="mi"><div class="mk">TYPE</div><div class="mv">'+x(p.Type||'—')+'</div></div>'+
+    '</div>'+
+    '<div class="mg">'+
+      '<div class="mi"><div class="mk">L1</div><div class="mv">'+x(p.L1||'—')+'</div></div>'+
+      '<div class="mi"><div class="mk">W1</div><div class="mv">'+x(p.W1||'—')+'</div></div>'+
     '</div></div>';
 }
 
-function switchBox(b) {
-  S.box = b;
-  S.boxPanels = [];
-  drawPack();
-  if (S.order) {
-    apiPost('getBoxPanels', { orderId: S.order.OrderID, boxNo: S.box }, function(panels) {
-      S.boxPanels = panels || [];
-      var cnum = document.getElementById('cNum');
-      if (cnum) cnum.textContent = S.boxPanels.length;
-      var list = document.getElementById('panelList');
-      if (list) list.innerHTML = renderPanelList();
-    }, function(){});
+function renderPList(){
+  if(S.panels.length===0)return'<div class="empty" style="padding:20px"><div class="eico" style="font-size:32px">📦</div><div class="etxt">Scan first panel</div></div>';
+  var h='';
+  for(var i=0;i<S.panels.length;i++){var p=S.panels[i];h+='<div class="pr"><div class="pn">'+(i+1)+'</div><div class="pid">'+x(p.PanelID)+'</div><div class="ptyp">'+x(p.Module||p.Type||'—')+'</div><div class="pdim">'+x(p.L1||'—')+'×'+x(p.W1||'—')+'</div><div style="width:20px;text-align:center">✅</div></div>';}
+  return h;
+}
+
+function swBox(b){
+  S.box=b;S.panels=[];drawPack();
+  if(S.order){
+    google.script.run.withSuccessHandler(function(ps){
+      S.panels=ps||[];
+      var cn=document.getElementById('cNum');if(cn)cn.textContent=S.panels.length;
+      var pl=document.getElementById('pList');if(pl)pl.innerHTML=renderPList();
+    }).withFailureHandler(function(){}).getBoxPanels(S.order.OrderID,S.box);
   }
 }
 
-function nextBox() {
-  var n = parseInt(S.box.replace('BOX-', '')) + 1;
-  var next = 'BOX-' + (n < 10 ? '0'+n : n);
-  switchBox(next);
-  toast('Switched to ' + next, 'info');
+function nxtBox(){
+  var n=parseInt(S.box.replace('BOX-',''))+1;
+  swBox('BOX-'+(n<10?'0'+n:n));
+  toast('Switched to BOX-0'+n,'info');
 }
 
-function clearBox() {
-  if (!confirm('Clear all panels from ' + S.box + '?')) return;
-  S.boxPanels = [];
-  var list = document.getElementById('panelList');
-  if (list) list.innerHTML = renderPanelList();
-  var cnum = document.getElementById('cNum');
-  if (cnum) cnum.textContent = '0';
-  toast('Box cleared', 'info');
+function clearBox(){
+  if(!confirm('Clear '+S.box+'?'))return;
+  S.panels=[];
+  var pl=document.getElementById('pList');if(pl)pl.innerHTML=renderPList();
+  var cn=document.getElementById('cNum');if(cn)cn.textContent='0';
+  toast('Cleared','info');
 }
 
-function openSeal() { document.getElementById('sealNotes').value=''; openModal('mSeal'); }
-function doSeal() {
-  var notes = document.getElementById('sealNotes').value;
-  closeModal('mSeal');
-  apiPost('sealBox', { orderId: S.order.OrderID, boxNo: S.box, notes: notes }, function() {
-    toast(S.box + ' sealed!', 'ok');
-    nextBox();
-  }, function() { toast('Seal failed', 'err'); });
+function openSeal(){document.getElementById('sNotes').value='';openM('mSeal');}
+function doSeal(){
+  var n=document.getElementById('sNotes').value;
+  closeM('mSeal');
+  google.script.run.withSuccessHandler(function(){toast(S.box+' sealed!','ok');nxtBox();})
+    .withFailureHandler(function(){toast('Seal failed','err');})
+    .sealBox(S.order.OrderID,S.box,n);
 }
 
-// ── ORDERS ─────────────────────────────────────────────
-function openOrders() { openModal('mOrders'); searchOrders(''); }
-
-function searchOrders(q) {
-  var con = document.getElementById('oResults');
-  con.innerHTML = '<div class="loading"><div class="spin"></div><span>Loading...</span></div>';
-  api('getOrders', { query: q }, function(orders) {
-    if (!orders || orders.length === 0) {
-      con.innerHTML = '<div class="empty" style="padding:20px"><div class="empty-txt">No orders found</div></div>';
-      return;
+// ── ORDERS
+function openOrd(){openM('mOrd');srchOrd('');}
+function srchOrd(q){
+  var c=document.getElementById('oList');
+  c.innerHTML='<div class="ld"><div class="spin"></div></div>';
+  google.script.run.withSuccessHandler(function(orders){
+    if(!orders||orders.length===0){c.innerHTML='<div class="empty" style="padding:20px"><div class="etxt">No orders</div></div>';return;}
+    var h='';
+    for(var i=0;i<orders.length;i++){
+      var o=orders[i];
+      var tot=parseInt(o.TotalPanels)||0,pk=parseInt(o.PackedPanels)||0;
+      var pct=tot>0?Math.round(pk/tot*100):0;
+      var sc=o.Status==='Packed'?'sp':pk>0?'sm':'sa';
+      var oj=encodeURIComponent(JSON.stringify(o));
+      h+='<div class="oi" onclick="pickOrd(\''+oj+'\')">'+
+        '<div style="flex:1"><div class="on2">'+x(o.CustomerName)+'</div><div class="om">'+x(o.OrderNo)+' · '+x(o.Type)+'</div>'+
+        '<div class="pb"><div class="pf" style="width:'+pct+'%"></div></div>'+
+        '<div style="font-size:11px;color:#6b7280;margin-top:3px">'+pk+'/'+tot+' packed</div></div>'+
+        '<span class="stag '+sc+'" style="margin-left:10px">'+x(o.Status||'Active')+'</span></div>';
     }
-    var html = '';
-    for (var i = 0; i < orders.length; i++) {
-      var o = orders[i];
-      var total = parseInt(o.TotalPanels)||0;
-      var packed = parseInt(o.PackedPanels)||0;
-      var pct = total>0 ? Math.round(packed/total*100) : 0;
-      var sc = o.Status==='Packed' ? 's-packed' : packed>0 ? 's-partial' : 's-active';
-      var oj = encodeURIComponent(JSON.stringify(o));
-      html += '<div class="order-item" onclick="pickOrder(\'' + oj + '\')">' +
-        '<div style="flex:1">' +
-          '<div class="o-name">' + esc(o.CustomerName) + '</div>' +
-          '<div class="o-meta">' + esc(o.OrderNo) + ' · ' + esc(o.Type) + '</div>' +
-          '<div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div>' +
-          '<div style="font-size:11px;color:var(--muted);margin-top:3px">' + packed + '/' + total + ' packed</div>' +
-        '</div>' +
-        '<span class="status-tag ' + sc + '" style="margin-left:10px">' + esc(o.Status||'Active') + '</span>' +
-      '</div>';
-    }
-    con.innerHTML = html;
-  }, function(e) {
-    con.innerHTML = '<div style="color:var(--danger);padding:12px;font-size:13px">Error: ' + esc(e.message||'') + '</div>';
+    c.innerHTML=h;
+  }).withFailureHandler(function(e){c.innerHTML='<div style="color:#e74c3c;padding:12px">Error: '+x(e.message||'')+'</div>';})
+  .getOrders(q);
+}
+
+function pickOrd(oj){
+  try{S.order=JSON.parse(decodeURIComponent(oj));}catch(e){toast('Error','err');return;}
+  S.box='BOX-01';S.panels=[];
+  closeM('mOrd');drawPack();
+  toast('Job: '+S.order.CustomerName,'ok');
+}
+
+function openNew(){closeM('mOrd');openM('mNew');}
+function pickT(el,t){
+  S.otype=t;
+  var cs=document.querySelectorAll('#typCh .chip');
+  for(var i=0;i<cs.length;i++)cs[i].classList.remove('on');
+  el.classList.add('on');
+}
+function saveOrd(){
+  var nm=document.getElementById('nName').value.trim();
+  if(!nm){toast('Customer name required!','err');return;}
+  var o={CustomerName:nm,OrderNo:document.getElementById('nNo').value.trim(),Type:S.otype,Address:document.getElementById('nAddr').value.trim()};
+  google.script.run.withSuccessHandler(function(res){
+    o.OrderID=res.OrderID;o.TotalPanels=0;o.PackedPanels=0;o.Status='Active';
+    closeM('mNew');S.order=o;S.box='BOX-01';S.panels=[];drawPack();
+    toast('Order created!','ok');
+  }).withFailureHandler(function(e){toast('Error: '+(e.message||''),'err');}).saveOrder(o);
+}
+
+// ── CUTLIST
+function drawCutlist(){
+  var pg=document.getElementById('pg-cutlist');
+  if(!S.order){pg.innerHTML='<div class="empty" style="margin-top:40px"><div class="eico">📋</div><div class="etxt">No Order Selected</div><button class="btn btn-p" style="margin-top:16px;max-width:220px" onclick="openOrd()">Select Order</button></div>';return;}
+  pg.innerHTML='<div style="font-size:18px;font-weight:800;margin-bottom:14px">Cutlist</div>'+
+    '<div class="card" style="background:#e8f7f5;border:1.5px dashed #1a8a7a;cursor:pointer" onclick="document.getElementById(\'csvF\').click()">'+
+      '<div style="text-align:center;padding:8px">'+
+        '<div style="font-size:24px;margin-bottom:6px">📄</div>'+
+        '<div style="font-weight:700;color:#1a8a7a">Tap to upload CSV</div>'+
+        '<div style="font-size:12px;color:#6b7280">CNC (semicolon) or Standard (comma)</div>'+
+      '</div>'+
+      '<input type="file" id="csvF" accept=".csv,.txt" style="display:none" onchange="upCSV(this)"/>'+
+    '</div>'+
+    '<div id="clBody"><div class="ld"><div class="spin"></div></div></div>';
+  loadCL();
+}
+
+function loadCL(){
+  var c=document.getElementById('clBody');
+  if(!c||!S.order)return;
+  google.script.run.withSuccessHandler(function(list){
+    S.cutlist=list||[];
+    if(S.cutlist.length===0){c.innerHTML='<div class="empty"><div class="eico">📄</div><div class="etxt">No Cutlist</div><div class="esub">Upload CSV</div></div>';return;}
+    var pk=0;for(var i=0;i<S.cutlist.length;i++)if(S.cutlist[i].Status==='Packed')pk++;
+    var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-weight:700">Panels ('+S.cutlist.length+')</div><span style="color:#1a8a7a;font-size:13px;font-weight:600">'+pk+' packed</span></div><div class="card" style="padding:8px 14px">';
+    for(var j=0;j<S.cutlist.length;j++){var p=S.cutlist[j];h+='<div class="pr"><div class="pn">'+(j+1)+'</div><div class="pid">'+x(p.PanelID)+'</div><div class="ptyp">'+x(p.Module||p.Type||'—')+'</div><div class="pdim">'+x(p.L1||'—')+'×'+x(p.W1||'—')+'</div><div style="width:20px;text-align:center">'+(p.Status==='Packed'?'✅':'⬜')+'</div></div>';}
+    c.innerHTML=h+'</div>';
+  }).withFailureHandler(function(){c.innerHTML='<div style="color:#e74c3c;padding:12px">Error loading</div>';})
+  .getCutlist(S.order.OrderID);
+}
+
+function upCSV(inp){
+  var file=inp.files[0];if(!file)return;
+  toast('Uploading...','info');
+  var rd=new FileReader();
+  rd.onload=function(e){
+    google.script.run.withSuccessHandler(function(res){
+      toast('✅ '+res.count+' panels loaded!','ok');
+      loadCL();
+    }).withFailureHandler(function(err){toast('Upload error','err');})
+    .uploadCutlist(e.target.result,S.order.OrderID);
+  };
+  rd.readAsText(file);
+}
+
+// ── LABEL
+function drawLabel(){
+  var pg=document.getElementById('pg-label');
+  if(!S.order){pg.innerHTML='<div class="empty" style="margin-top:40px"><div class="eico">🏷️</div><div class="etxt">No Order Selected</div><button class="btn btn-p" style="margin-top:16px;max-width:220px" onclick="openOrd()">Select Order</button></div>';return;}
+  var o=S.order,h='<div style="font-size:18px;font-weight:800;margin-bottom:14px">Box Labels</div>';
+  ['BOX-01','BOX-02','BOX-03','BOX-04','BOX-05','BOX-06','BOX-07','BOX-08','BOX-09','BOX-10'].forEach(function(b){
+    h+='<div class="card" style="border-left:4px solid #1a8a7a">'+
+      '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">'+
+        '<div><div style="font-size:18px;font-weight:800;color:#1a8a7a">'+b+'</div>'+
+        '<div style="font-size:14px;font-weight:700">'+x(o.CustomerName)+'</div>'+
+        '<div style="font-size:12px;color:#6b7280">'+x(o.OrderNo)+'</div>'+
+        '<div style="font-size:12px;color:#6b7280">'+x(o.Type)+' · '+x(o.Address||'')+'</div></div>'+
+        '<div style="text-align:right;font-size:11px;color:#6b7280">AMAC Kitchens<br>Mohali</div>'+
+      '</div>'+
+      '<button class="btn btn-s bsm" onclick="prtLbl(\''+b+'\')">🖨️ Print</button></div>';
   });
+  pg.innerHTML=h;
 }
 
-function pickOrder(ojson) {
-  try { S.order = JSON.parse(decodeURIComponent(ojson)); }
-  catch(e) { toast('Parse error', 'err'); return; }
-  S.box = 'BOX-01';
-  S.boxPanels = [];
-  closeModal('mOrders');
-  drawPack();
-  toast('Job loaded: ' + S.order.CustomerName, 'ok');
-}
-
-function openNewOrder() { closeModal('mOrders'); openModal('mNewOrder'); }
-function pickType(el, t) {
-  S.orderType = t;
-  var chips = document.querySelectorAll('#typeChips .chip');
-  for (var i=0;i<chips.length;i++) chips[i].classList.remove('active');
-  el.classList.add('active');
-}
-
-function saveOrder() {
-  var name = document.getElementById('nCustName').value.trim();
-  if (!name) { toast('Customer name required!', 'err'); return; }
-  var order = {
-    CustomerName: name,
-    OrderNo: document.getElementById('nOrderNo').value.trim(),
-    Type: S.orderType,
-    Address: document.getElementById('nAddr').value.trim()
-  };
-  apiPost('saveOrder', order, function(res) {
-    order.OrderID = res.OrderID;
-    order.TotalPanels = 0; order.PackedPanels = 0; order.Status = 'Active';
-    closeModal('mNewOrder');
-    S.order = order;
-    S.box = 'BOX-01';
-    S.boxPanels = [];
-    drawPack();
-    toast('Order created!', 'ok');
-  }, function(e) { toast('Error: ' + (e.message||''), 'err'); });
-}
-
-// ── CUTLIST PAGE ───────────────────────────────────────
-function drawCutlist() {
-  var pg = document.getElementById('pg-cutlist');
-  if (!S.order) {
-    pg.innerHTML = '<div class="empty" style="margin-top:40px"><div class="empty-ico">📋</div><div class="empty-txt">No Order Selected</div><button class="btn btn-primary" style="margin-top:16px;max-width:220px" onclick="openOrders()">Select Order</button></div>';
-    return;
-  }
-  pg.innerHTML =
-    '<div style="font-size:18px;font-weight:800;margin-bottom:14px">Cutlist</div>' +
-    '<div class="card" style="background:var(--teal-light);border:1.5px dashed var(--teal);cursor:pointer" onclick="document.getElementById(\'csvFile\').click()">' +
-      '<div style="text-align:center;padding:8px">' +
-        '<div style="font-size:24px;margin-bottom:6px">📄</div>' +
-        '<div style="font-weight:700;color:var(--teal)">Tap to upload CSV</div>' +
-        '<div style="font-size:12px;color:var(--muted)">CNC (semicolon) or Standard (comma)</div>' +
-      '</div>' +
-      '<input type="file" id="csvFile" accept=".csv,.txt" style="display:none" onchange="uploadCSV(this)"/>' +
-    '</div>' +
-    '<div id="cutlistBody"><div class="loading"><div class="spin"></div><span>Loading...</span></div></div>';
-  loadCutlist();
-}
-
-function loadCutlist() {
-  var con = document.getElementById('cutlistBody');
-  if (!con || !S.order) return;
-  api('getCutlist', { orderId: S.order.OrderID }, function(list) {
-    S.cutlist = list || [];
-    if (S.cutlist.length === 0) {
-      con.innerHTML = '<div class="empty"><div class="empty-ico">📄</div><div class="empty-txt">No Cutlist</div><div class="empty-sub">Upload a CSV file</div></div>';
-      return;
-    }
-    var packed = 0;
-    for (var i=0;i<S.cutlist.length;i++) { if (S.cutlist[i].Status==='Packed') packed++; }
-    var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-weight:700">Panels (' + S.cutlist.length + ')</div><span style="color:var(--teal);font-size:13px;font-weight:600">' + packed + ' packed</span></div><div class="card" style="padding:8px 14px">';
-    for (var j=0;j<S.cutlist.length;j++) {
-      var p = S.cutlist[j];
-      html += '<div class="panel-row"><div class="pr-num">' + (j+1) + '</div><div class="pr-id">' + esc(p.PanelID) + '</div><div class="pr-type">' + esc(p.Module||p.Type||'—') + '</div><div class="pr-dim">' + esc(p.L1||'—') + '×' + esc(p.W1||'—') + '</div><div class="pr-status">' + (p.Status==='Packed'?'✅':'⬜') + '</div></div>';
-    }
-    con.innerHTML = html + '</div>';
-  }, function() { con.innerHTML = '<div style="color:var(--danger);padding:12px">Error loading cutlist</div>'; });
-}
-
-function uploadCSV(inp) {
-  var file = inp.files[0];
-  if (!file) return;
-  toast('Reading file...', 'info');
-  
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var csvText = e.target.result;
-    var orderId = S.order.OrderID;
-    
-    // Parse CSV in browser, send rows in chunks via GET
-    var delimiter = csvText.split('\n')[0].indexOf(';') >= 0 ? ';' : ',';
-    var lines = csvText.trim().split('\n');
-    var headers = lines[0].split(delimiter).map(function(h) { return h.trim().replace(/"/g,'').toLowerCase(); });
-    
-    function findCol(aliases) {
-      for (var a = 0; a < aliases.length; a++) {
-        var idx = headers.indexOf(aliases[a]);
-        if (idx !== -1) return idx;
-      }
-      return -1;
-    }
-    
-    var cols = {
-      barcode: findCol(['barcode']),
-      cnc1: findCol(['cnc_1']),
-      cnc2: findCol(['cnc_2']),
-      partname: findCol(['partname','part_name']),
-      artdesc: findCol(['art_desc','artdesc']),
-      matname: findCol(['matname','material']),
-      cleng: findCol(['cleng','finishlength','l1']),
-      cwidth: findCol(['cwidth','finishwidth','finishwitdh','w1']),
-      thickness: findCol(['finishthickness','cut_thk','thickness'])
-    };
-    
-    var rows = [];
-    for (var i = 1; i < lines.length; i++) {
-      var line = lines[i].trim();
-      if (!line) continue;
-      var vals = line.split(delimiter).map(function(v) { return v.trim().replace(/"/g,'').replace(/
-/g,''); });
-      
-      var barcode = cols.barcode >= 0 ? vals[cols.barcode] : '';
-      var cnc1 = cols.cnc1 >= 0 ? vals[cols.cnc1] : '';
-      var cnc2 = cols.cnc2 >= 0 ? vals[cols.cnc2] : '';
-      var partname = cols.partname >= 0 ? vals[cols.partname] : '';
-      var artdesc = cols.artdesc >= 0 ? vals[cols.artdesc] : '';
-      var matname = cols.matname >= 0 ? vals[cols.matname] : '';
-      var l1 = cols.cleng >= 0 ? vals[cols.cleng] : '';
-      var w1 = cols.cwidth >= 0 ? vals[cols.cwidth] : '';
-      var thickness = cols.thickness >= 0 ? vals[cols.thickness] : '';
-      
-      if (!barcode) continue;
-      
-      rows.push([barcode, partname, artdesc, matname, l1, w1, thickness]);
-      if (cnc1 && cnc1 !== barcode) rows.push([cnc1, partname, artdesc, matname, l1, w1, thickness]);
-      if (cnc2 && cnc2 !== barcode && cnc2 !== cnc1) rows.push([cnc2, partname, artdesc, matname, l1, w1, thickness]);
-    }
-    
-    // Send all rows via GET in chunks of 50
-    var CHUNK = 50;
-    var total = rows.length;
-    var sent = 0;
-    
-    toast('Uploading ' + total + ' panels...', 'info');
-    
-    function sendChunk(start) {
-      if (start >= rows.length) {
-        // All done
-        api('finalizeCutlist', { orderId: orderId, count: Math.floor(total/2) }, function() {
-          toast('✅ ' + total + ' entries loaded!', 'ok');
-          loadCutlist();
-        }, function() {
-          toast('✅ Upload done!', 'ok');
-          loadCutlist();
-        });
-        return;
-      }
-      
-      var chunk = rows.slice(start, start + CHUNK);
-      var url = GAS_URL + '?fn=insertRows&orderId=' + encodeURIComponent(orderId) + 
-                '&rows=' + encodeURIComponent(JSON.stringify(chunk)) +
-                '&clear=' + (start === 0 ? '1' : '0');
-      
-      fetch(url)
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          sent += chunk.length;
-          var pct = Math.round(sent / rows.length * 100);
-          toast('Uploading... ' + pct + '%', 'info');
-          sendChunk(start + CHUNK);
-        })
-        .catch(function(e) {
-          // Try next chunk anyway
-          sendChunk(start + CHUNK);
-        });
-    }
-    
-    sendChunk(0);
-  };
-  reader.readAsText(file);
-}
-
-// ── LABEL PAGE ─────────────────────────────────────────
-function drawLabel() {
-  var pg = document.getElementById('pg-label');
-  if (!S.order) {
-    pg.innerHTML = '<div class="empty" style="margin-top:40px"><div class="empty-ico">🏷️</div><div class="empty-txt">No Order Selected</div><button class="btn btn-primary" style="margin-top:16px;max-width:220px" onclick="openOrders()">Select Order</button></div>';
-    return;
-  }
-  var o = S.order;
-  var html = '<div style="font-size:18px;font-weight:800;margin-bottom:14px">Box Labels</div>';
-  var boxes = ['BOX-01','BOX-02','BOX-03','BOX-04','BOX-05','BOX-06','BOX-07','BOX-08','BOX-09','BOX-10'];
-  for (var i=0;i<boxes.length;i++) {
-    var b = boxes[i];
-    html += '<div class="card" style="border-left:4px solid var(--teal)">' +
-      '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">' +
-        '<div><div style="font-size:18px;font-weight:800;color:var(--teal)">' + b + '</div>' +
-        '<div style="font-size:14px;font-weight:700">' + esc(o.CustomerName) + '</div>' +
-        '<div style="font-size:12px;color:var(--muted)">' + esc(o.OrderNo) + '</div>' +
-        '<div style="font-size:12px;color:var(--muted)">' + esc(o.Type) + ' · ' + esc(o.Address||'') + '</div></div>' +
-        '<div style="text-align:right;font-size:11px;color:var(--muted)">AMAC Kitchens<br>Mohali</div>' +
-      '</div>' +
-      '<button class="btn btn-secondary btn-sm" onclick="printLbl(\'' + b + '\')">🖨️ Print Label</button>' +
-    '</div>';
-  }
-  pg.innerHTML = html;
-}
-
-function printLbl(box) {
-  var o = S.order;
-  var w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html><head><title>Label ' + box + '</title><style>body{font-family:Arial,sans-serif;padding:24px;max-width:400px}.bn{font-size:52px;font-weight:900;color:#1a8a7a}.on{font-size:18px;font-weight:700;margin-bottom:4px}.cn{font-size:22px;font-weight:800}.mt{color:#666;font-size:14px;margin-top:4px}.ft{margin-top:20px;padding-top:10px;border-top:2px solid #eee;font-size:12px;color:#666}@media print{button{display:none}}</style></head><body><div class="bn">' + box + '</div><div class="on">' + esc(o.OrderNo) + '</div><div class="cn">' + esc(o.CustomerName) + '</div><div class="mt">' + esc(o.Type) + ' · ' + esc(o.Address||'') + '</div><div class="ft">AMAC Kitchens &amp; Wardrobes · Mohali</div><br><button onclick="window.print()">Print</button></body></html>');
+function prtLbl(box){
+  var o=S.order,w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>'+box+'</title><style>body{font-family:Arial,sans-serif;padding:24px;max-width:400px}.b{font-size:52px;font-weight:900;color:#1a8a7a}.n{font-size:22px;font-weight:800}.m{color:#666;font-size:14px;margin-top:4px}.f{margin-top:20px;padding-top:10px;border-top:2px solid #eee;font-size:12px;color:#666}@media print{button{display:none}}</style></head><body>'+
+    '<div class="b">'+box+'</div><div class="n">'+x(o.CustomerName)+'</div>'+
+    '<div class="m">'+x(o.OrderNo)+'</div><div class="m">'+x(o.Type)+' · '+x(o.Address||'')+'</div>'+
+    '<div class="f">AMAC Kitchens &amp; Wardrobes · Mohali</div><br><button onclick="window.print()">Print</button></body></html>');
   w.document.close();
 }
 
-// ── REPORT PAGE ────────────────────────────────────────
-function drawReport() {
-  var pg = document.getElementById('pg-report');
-  if (!S.order) {
-    pg.innerHTML = '<div class="empty" style="margin-top:40px"><div class="empty-ico">📊</div><div class="empty-txt">No Order Selected</div><button class="btn btn-primary" style="margin-top:16px;max-width:220px" onclick="openOrders()">Select Order</button></div>';
-    return;
-  }
-  pg.innerHTML = '<div class="loading" style="margin-top:40px"><div class="spin"></div><span>Loading...</span></div>';
-  api('getPackingReport', { orderId: S.order.OrderID }, function(r) {
-    var pct = r.total>0 ? Math.round(r.packed/r.total*100) : 0;
-    var html =
-      '<div style="background:var(--teal);color:white;border-radius:12px;padding:16px;margin-bottom:12px">' +
-        '<div style="font-size:18px;font-weight:800">' + esc(r.order?r.order.CustomerName:'—') + '</div>' +
-        '<div style="font-size:13px;opacity:0.8">' + esc(r.order?r.order.OrderNo:'') + ' · ' + esc(r.order?r.order.Type:'') + '</div>' +
-      '</div>' +
-      '<div class="stats-grid">' +
-        '<div class="stat-card"><div class="stat-num">' + r.total + '</div><div class="stat-lbl">Total Panels</div></div>' +
-        '<div class="stat-card"><div class="stat-num" style="color:var(--success)">' + r.packed + '</div><div class="stat-lbl">Packed</div></div>' +
-        '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">' + r.pending + '</div><div class="stat-lbl">Pending</div></div>' +
-        '<div class="stat-card"><div class="stat-num">' + pct + '%</div><div class="stat-lbl">Complete</div></div>' +
-      '</div>' +
-      '<div style="font-weight:700;margin-bottom:10px">Boxes (' + r.boxes.length + ')</div>';
-    for (var i=0;i<r.boxes.length;i++) {
-      var b = r.boxes[i];
-      var sc = b.Status==='Sealed' ? 'background:#dcfce7;color:#166634' : 'background:#fef3c7;color:#92400e';
-      html += '<div style="background:white;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:16px;font-weight:800">' + esc(b.BoxNo) + '</div><div style="font-size:12px;color:var(--muted)">' + (b.PanelCount||0) + ' panels</div></div><span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;' + sc + '">' + esc(b.Status||'Open') + '</span></div>';
+// ── REPORT
+function drawReport(){
+  var pg=document.getElementById('pg-report');
+  if(!S.order){pg.innerHTML='<div class="empty" style="margin-top:40px"><div class="eico">📊</div><div class="etxt">No Order Selected</div><button class="btn btn-p" style="margin-top:16px;max-width:220px" onclick="openOrd()">Select Order</button></div>';return;}
+  pg.innerHTML='<div class="ld" style="margin-top:40px"><div class="spin"></div></div>';
+  google.script.run.withSuccessHandler(function(r){
+    var pct=r.total>0?Math.round(r.packed/r.total*100):0;
+    var h='<div style="background:#1a8a7a;color:white;border-radius:12px;padding:16px;margin-bottom:12px">'+
+      '<div style="font-size:18px;font-weight:800">'+x(r.order?r.order.CustomerName:'—')+'</div>'+
+      '<div style="font-size:13px;opacity:.8">'+x(r.order?r.order.OrderNo:'')+'</div></div>'+
+      '<div class="sg">'+
+        '<div class="sc"><div class="sn">'+r.total+'</div><div class="sl">Total</div></div>'+
+        '<div class="sc"><div class="sn" style="color:#27ae60">'+r.packed+'</div><div class="sl">Packed</div></div>'+
+        '<div class="sc"><div class="sn" style="color:#f0a500">'+r.pending+'</div><div class="sl">Pending</div></div>'+
+        '<div class="sc"><div class="sn">'+pct+'%</div><div class="sl">Done</div></div>'+
+      '</div>'+
+      '<div style="font-weight:700;margin-bottom:10px">Boxes ('+r.boxes.length+')</div>';
+    for(var i=0;i<r.boxes.length;i++){
+      var b=r.boxes[i];
+      var sc=b.Status==='Sealed'?'background:#dcfce7;color:#166634':'background:#fef3c7;color:#92400e';
+      h+='<div style="background:white;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between">'+
+        '<div><div style="font-size:16px;font-weight:800">'+x(b.BoxNo)+'</div><div style="font-size:12px;color:#6b7280">'+(b.PanelCount||0)+' panels</div></div>'+
+        '<span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;'+sc+'">'+x(b.Status||'Open')+'</span></div>';
     }
-    pg.innerHTML = html;
-  }, function() { pg.innerHTML = '<div style="color:var(--danger);padding:16px">Error loading report</div>'; });
+    pg.innerHTML=h;
+  }).withFailureHandler(function(){pg.innerHTML='<div style="color:#e74c3c;padding:16px">Error</div>';})
+  .getPackingReport(S.order.OrderID);
 }
 
-// ── SETUP PAGE ─────────────────────────────────────────
-function drawSetup() {
-  var pg = document.getElementById('pg-setup');
-  pg.innerHTML = '<div class="loading"><div class="spin"></div></div>';
-  api('getSettings', {}, function(s) {
-    pg.innerHTML =
-      '<div style="font-size:18px;font-weight:800;margin-bottom:16px">Settings</div>' +
-      '<div class="card">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">' +
-          '<div><div style="font-size:14px;font-weight:600">Company Name</div><div style="font-size:13px;color:var(--muted)" id="sv-company">' + esc(s.CompanyName||'') + '</div></div>' +
-          '<button class="btn btn-secondary btn-sm" onclick="editSet(\'CompanyName\',\'Company Name\',\'sv-company\')">Edit</button>' +
-        '</div>' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">' +
-          '<div><div style="font-size:14px;font-weight:600">City</div><div style="font-size:13px;color:var(--muted)" id="sv-city">' + esc(s.City||'') + '</div></div>' +
-          '<button class="btn btn-secondary btn-sm" onclick="editSet(\'City\',\'City\',\'sv-city\')">Edit</button>' +
-        '</div>' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">' +
-          '<div><div style="font-size:14px;font-weight:600">Packer Name</div><div style="font-size:13px;color:var(--muted)" id="sv-packer">' + esc(s.PackerName||'Not set') + '</div></div>' +
-          '<button class="btn btn-secondary btn-sm" onclick="editSet(\'PackerName\',\'Packer Name\',\'sv-packer\')">Edit</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="card">' +
-        '<div class="card-title">Actions</div>' +
-        '<button class="btn btn-secondary" style="margin-bottom:8px" onclick="doSetup()">🔧 Initialize Google Sheets</button>' +
-        '<button class="btn btn-outline" onclick="openOrders()">📦 Manage Orders</button>' +
-      '</div>' +
-      '<div class="card" style="background:var(--teal-light)">' +
-        '<div style="font-size:13px;color:var(--teal);font-weight:600">AMAC Packing System v3.0</div>' +
-        '<div style="font-size:12px;color:var(--muted);margin-top:4px">GitHub Pages + Google Apps Script</div>' +
+// ── SETUP
+function drawSetup(){
+  var pg=document.getElementById('pg-setup');
+  pg.innerHTML='<div class="ld"><div class="spin"></div></div>';
+  google.script.run.withSuccessHandler(function(s){
+    pg.innerHTML='<div style="font-size:18px;font-weight:800;margin-bottom:16px">Settings</div>'+
+      '<div class="card">'+
+        mkSet('Company','CompanyName','sv-co',s.CompanyName||'')+
+        mkSet('City','City','sv-cy',s.City||'')+
+        mkSet('Packer Name','PackerName','sv-pk',s.PackerName||'Not set')+
+      '</div>'+
+      '<div class="card"><div class="ctitle">Actions</div>'+
+        '<button class="btn btn-s" style="margin-bottom:8px" onclick="doSetup()">🔧 Initialize Sheets</button>'+
+        '<button class="btn btn-o" onclick="openOrd()">📦 Manage Orders</button>'+
+      '</div>'+
+      '<div class="card" style="background:#e8f7f5">'+
+        '<div style="font-size:13px;color:#1a8a7a;font-weight:600">AMAC Packing System v3.0</div>'+
+        '<div style="font-size:12px;color:#6b7280;margin-top:4px">Google Apps Script + Sheets</div>'+
       '</div>';
-  }, function() {
-    pg.innerHTML = '<div style="padding:16px;color:var(--danger)">Error loading settings.</div><button class="btn btn-primary" style="margin:16px" onclick="doSetup()">🔧 Initialize Sheets</button>';
-  });
+  }).withFailureHandler(function(){
+    pg.innerHTML='<div style="padding:16px;color:#e74c3c">Error. Initialize sheets first.</div><button class="btn btn-p" style="margin:16px" onclick="doSetup()">🔧 Initialize</button>';
+  }).getSettings();
 }
 
-function editSet(key, label, elId) {
-  var curr = document.getElementById(elId) ? document.getElementById(elId).textContent : '';
-  var val = prompt(label + ' enter karo:', curr==='Not set' ? '' : curr);
-  if (val === null) return;
-  apiPost('saveSetting', { key: key, value: val }, function() {
-    var el = document.getElementById(elId);
-    if (el) el.textContent = val||'Not set';
-    if (key==='PackerName') S.packer = val;
-    toast(label + ' updated!', 'ok');
-    loadSettings();
-  }, function() { toast('Save failed', 'err'); });
+function mkSet(lbl,key,id,val){
+  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #e2e8f0">'+
+    '<div><div style="font-size:14px;font-weight:600">'+lbl+'</div><div style="font-size:13px;color:#6b7280" id="'+id+'">'+x(val)+'</div></div>'+
+    '<button class="btn btn-s bsm" onclick="edSet(\''+key+'\',\''+lbl+'\',\''+id+'\')">Edit</button></div>';
 }
 
-function doSetup() {
-  toast('Setting up...', 'info');
-  api('setupSheets', {}, function() { toast('✅ Sheets ready!', 'ok'); }, function(e) { toast('Error: '+(e.message||''), 'err'); });
+function edSet(key,lbl,id){
+  var curr=document.getElementById(id)?document.getElementById(id).textContent:'';
+  var v=prompt(lbl+':',curr==='Not set'?'':curr);
+  if(v===null)return;
+  google.script.run.withSuccessHandler(function(){
+    var el=document.getElementById(id);if(el)el.textContent=v||'Not set';
+    if(key==='PackerName')S.packer=v;
+    toast(lbl+' updated!','ok');
+  }).withFailureHandler(function(){toast('Save failed','err');}).saveSetting(key,v);
 }
 
-function checkConn() {
-  api('getSettings', {}, function() {
-    toast('✅ Connected!', 'ok');
-    document.getElementById('connDot').style.background = '#4ade80';
-  }, function() {
-    toast('Cannot connect', 'err');
-    document.getElementById('connDot').style.background = '#f87171';
-  });
+function doSetup(){
+  toast('Setting up...','info');
+  google.script.run.withSuccessHandler(function(){toast('✅ Sheets ready!','ok');})
+    .withFailureHandler(function(e){toast('Error: '+(e.message||''),'err');}).setupSheets();
 }
 
-function openModal(id) { var el=document.getElementById(id); if(el) el.classList.add('open'); }
-function closeModal(id) { var el=document.getElementById(id); if(el) el.classList.remove('open'); }
+function chkConn(){
+  google.script.run.withSuccessHandler(function(){toast('✅ Connected!','ok');document.getElementById('cDot').style.background='#4ade80';})
+    .withFailureHandler(function(){toast('Cannot connect','err');document.getElementById('cDot').style.background='#f87171';}).getSettings();
+}
 
-var toastTimer = null;
-function toast(msg, type) {
-  var t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.className = 'toast show t-' + (type||'info');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+// ── MODAL
+function openM(id){var e=document.getElementById(id);if(e)e.classList.add('on');}
+function closeM(id){var e=document.getElementById(id);if(e)e.classList.remove('on');}
+document.addEventListener('click',function(e){
+  ['mOrd','mNew','mSeal'].forEach(function(id){var el=document.getElementById(id);if(el&&e.target===el)el.classList.remove('on');});
+});
+
+// ── TOAST
+var tT=null;
+function toast(msg,type){
+  var t=document.getElementById('toast');if(!t)return;
+  t.textContent=msg;t.className='toast on t'+type;
+  if(tT)clearTimeout(tT);
+  tT=setTimeout(function(){t.classList.remove('on');},3000);
 }
 </script>
 </body>
