@@ -204,10 +204,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f7fa;color:#1a1a2e}
 <div class="toast" id="toast"></div>
 
 <script>
-var GAS = 'https://script.google.com/macros/s/AKfycbx45o0HYTLvgGyS9BNWhOZrx2qJKZQ_TnKzPXXR2g0RWC2P7w5s792EGApuscJpj5Ni/exec';
+// GAS_URL defined above
 
 // Detect if running inside GAS or GitHub Pages
-var IS_GAS = (typeof google !== 'undefined' && typeof google.script !== 'undefined');
+function isGAS() { return (typeof google !== 'undefined' && typeof google.script !== 'undefined'); }
 
 // Universal API call - works on both GAS and GitHub Pages
 function gasCall(fn, params, onSuccess, onError) {
@@ -232,7 +232,7 @@ function gasCall(fn, params, onSuccess, onError) {
 }
 
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbx45o0HYTLvgGyS9BNWhOZrx2qJKZQ_TnKzPXXR2g0RWC2P7w5s792EGApuscJpj5Ni/exec';
-var IS_GAS = (typeof google !== 'undefined' && typeof google.script !== 'undefined');
+function isGAS() { return (typeof google !== 'undefined' && typeof google.script !== 'undefined'); }
 var S = { order:null, box:'BOX-01', packer:'', panels:[], cutlist:[], otype:'Wardrobe', stream:null, scanning:false, lastCode:null };
 
 // Proxy for gsr that works on GitHub Pages too
@@ -262,7 +262,29 @@ var gsr = {
 // Create proxy methods for all GAS functions
 ['getSettings','getOrders','getCutlist','getBoxPanels','getPackingReport','addPanelToBox',
  'saveOrder','uploadCutlist','sealBox','saveSetting','setupSheets','getBoxes'].forEach(function(fn){
-  gsr[fn] = function(){gsr._call.call(this, fn, Array.prototype.slice.call(arguments));};
+  gsr[fn] = function(){
+    var args = Array.prototype.slice.call(arguments);
+    var obj = {
+      _sh: gsr._sh, _fh: gsr._fh,
+      withSuccessHandler: function(f){this._sh=f;return this;},
+      withFailureHandler: function(f){this._fh=f;return this;}
+    };
+    // Execute call
+    var sh=obj._sh, fh=obj._fh;
+    if(isGAS()){
+      var r=gsr;
+      if(sh) r=r.withSuccessHandler(sh);
+      if(fh) r=r.withFailureHandler(fh);
+      r[fn].apply(r, args);
+    } else {
+      var url = GAS_URL+'?fn='+encodeURIComponent(fn)+'&args='+encodeURIComponent(JSON.stringify(args));
+      fetch(url)
+        .then(function(r){return r.json();})
+        .then(function(d){if(d.error){if(fh)fh({message:d.error});return;}if(sh)sh(d.result!==undefined?d.result:d);})
+        .catch(function(e){if(fh)fh(e);});
+    }
+    return obj;
+  };
 });
 
 // ── BOOT
